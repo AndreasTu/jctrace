@@ -1,0 +1,1 @@
+java -cp build\libs\DeadlockTracer-1.0.0-SNAPSHOT-all.jar de.turban.deadlock.tracer.runtime.display.PrintMain Deadlock.db DeadlockReport.xml 

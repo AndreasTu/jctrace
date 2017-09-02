@@ -1,0 +1,5 @@
+rootProject.name = 'jctrace'
+
+
+include 'subprojects:jctrace-core'
+include 'subprojects:jctrace-ui'

@@ -1,0 +1,20 @@
+
+
+allprojects{
+    
+     buildscript {
+        repositories { jcenter() }
+    }
+   
+    apply plugin: 'idea'
+
+    repositories {
+        jcenter()
+    }
+}
+
+subprojects{
+
+    apply plugin: 'java'
+}
+

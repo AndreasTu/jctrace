@@ -1,0 +1,100 @@
+
+version = '1.0.0-SNAPSHOT'
+
+buildscript {
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.1'
+    }
+}
+
+apply plugin: 'com.github.johnrengelman.shadow'
+
+def jsr305Dep = 'com.google.code.findbugs:jsr305:3.0.1'
+def gnuTroveDep = 'net.sf.trove4j:trove4j:3.0.3'
+def disruptorDep = 'com.lmax:disruptor:3.3.2'
+
+// In this section you declare the dependencies for your production and test code
+dependencies {
+    // The production code uses the SLF4J logging API at compile time
+    compile 'org.slf4j:slf4j-api:1.7.13'
+    compile 'org.slf4j:slf4j-jdk14:1.7.13'
+
+    compile 'org.ow2.asm:asm:5.0.4'
+    compile 'org.ow2.asm:asm-util:5.0.4'
+    compile 'org.ow2.asm:asm-analysis:5.0.4'
+    compile 'org.ow2.asm:asm-commons:5.0.4'
+    compile 'org.ow2.asm:asm-tree:5.0.4'
+    
+    //Currently not used in production
+    compile disruptorDep
+    
+    compile gnuTroveDep
+    compile jsr305Dep
+
+   
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.hamcrest:hamcrest-all:1.3'
+    testCompile 'com.google.guava:guava:19.0'
+}
+
+
+
+test {
+    jvmArgs '-Xmx1124m'
+
+   //jvmArgs '-XX:+UnlockCommercialFeatures'
+   //jvmArgs '-XX:+FlightRecorder'
+   //jvmArgs '-XX:StartFlightRecording=dumponexit=true,settings=profile.jfc,filename=d:/test.jfr'
+
+}
+
+
+shadowJar {
+    dependencies {
+        exclude(dependency(jsr305Dep))
+        exclude(dependency(jsr305Dep))
+        exclude(dependency(disruptorDep))
+    }
+    //ASM
+    relocate 'org.objectweb.asm', 'de.turban.deadlock.tracer.dep.asm'
+    
+    //GNU Trove
+    relocate 'gnu.trove', 'de.turban.deadlock.tracer.dep.gnu.trove'
+    
+    
+    from('../../LICENSES') {
+        include '*.LICENSE'
+        into('META-INF/LICENSES')
+    }
+    
+    from('../../') {
+        include 'LICENSE'
+        into('META-INF')
+    }
+}
+
+jar {
+    from('../../LICENSES') {
+        include '*.LICENSE'
+        into('META-INF/LICENSES')
+    }
+    
+    from('../../') {
+        include 'LICENSE'
+        into('META-INF')
+    }
+
+    manifest {
+
+        attributes(
+
+                'Implementation-Title': project.name,
+
+                'Implementation-Version': project.version,
+                'Can-Redefine-Classes': 'true',
+                //'Main-Class': 'de.turban.deadlock.tracer.runtime.display.ui.DeadlockTracerUiMain',
+                'Premain-Class': 'de.turban.deadlock.tracer.DeadlockTracerAgent'
+
+        )
+    }
+}

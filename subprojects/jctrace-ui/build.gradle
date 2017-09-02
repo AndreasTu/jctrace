@@ -1,0 +1,85 @@
+
+version = '1.0.0-SNAPSHOT'
+
+def mainClassName = 'de.turban.deadlock.tracer.runtime.display.ui.DeadlockTracerUiMain'
+
+// In this section you declare the dependencies for your production and test code
+dependencies {
+    compile project(':subprojects:jctrace-core')
+    
+    
+    compile 'com.google.guava:guava:19.0'
+}
+
+
+task runUI(type: JavaExec) {
+  classpath = sourceSets.main.runtimeClasspath
+
+  main = mainClassName
+  if(hasDbFile()){
+    args rootProject.file(rootProject.ext.dbFile)
+  }
+  
+  doFirst{
+    assertDbFileSpecified()
+  }
+}
+
+task runReportXml(type: JavaExec) {
+  classpath = sourceSets.main.runtimeClasspath
+
+  main = 'de.turban.deadlock.tracer.runtime.display.PrintMain'
+  if(hasDbFile()){
+    args rootProject.file(rootProject.ext.dbFile)
+  }
+  if(hasReportFile()){
+    args rootProject.file(rootProject.ext.reportFile)
+  }
+  
+  doFirst{
+    assertDbFileSpecified()
+    assertReportFileSpecified()
+  }
+}
+
+
+test {
+    jvmArgs '-Xmx1124m'
+}
+
+
+jar {
+    manifest {
+
+        attributes(
+                'Implementation-Title': project.name,
+
+                'Implementation-Version': project.version,
+                'Main-Class': mainClassName,
+        )
+    }
+}
+
+
+/*
+ * Helper methods
+ */
+boolean hasDbFile(){
+    rootProject.hasProperty('dbFile')
+}
+
+boolean hasReportFile(){
+    rootProject.hasProperty('reportFile')
+}
+
+void assertDbFileSpecified(){
+    if(!hasDbFile()){ 
+        throw new IllegalArgumentException("You have to specify a db file with -PdbFile=pathToFile")
+    }
+}
+
+void assertReportFileSpecified(){
+    if(!hasReportFile()){ 
+        throw new IllegalArgumentException("You have to specify a report file with -PreportFile=pathToFile")
+    }
+}
