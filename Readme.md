@@ -93,6 +93,6 @@ gradlew runReportXml -PdbFile=Deadlock.db -PreportFile=DeadlockReport.xml
 
 
 ## Contributors
- * Creator:
+* Creator:
   * Andreas Turban (GitHub: AndreasTu)
 
