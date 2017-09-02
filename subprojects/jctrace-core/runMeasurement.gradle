@@ -1,0 +1,12 @@
+task runMeasurementTest(type: JavaExec) {
+    dependsOn("shadowJar")
+    group "Run"
+    
+    classpath = sourceSets.test.runtimeClasspath
+
+    main = 'de.turban.deadlock.tests.tracer.TestMain'
+  
+    jvmArgs '-javaagent:build/libs/jctrace-core-1.0.0-SNAPSHOT-all.jar'
+    jvmArgs '-Xbootclasspath/a:build/libs/jctrace-core-1.0.0-SNAPSHOT-all.jar'
+    jvmArgs '-Dde.turban.DeadLockTracer.blacklist=org.eclipse;com.google'
+}

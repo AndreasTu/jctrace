@@ -22,13 +22,35 @@ public class TestMain {
 
         ReentrantReadWriteLock l = new ReentrantReadWriteLock();
         Thread.sleep(1000);
-
+        ReentrantReadWriteLock l2 = new ReentrantReadWriteLock();
 
         l.readLock().lock();
         try {
 
+            l2.readLock().lock();
+            try {
+
+            } finally {
+                l2.readLock().unlock();
+            }
+
         } finally {
             l.readLock().unlock();
+        }
+
+
+        l2.readLock().lock();
+        try {
+
+            l.readLock().lock();
+            try {
+
+            } finally {
+                l.readLock().unlock();
+            }
+
+        } finally {
+            l2.readLock().unlock();
         }
 
     }

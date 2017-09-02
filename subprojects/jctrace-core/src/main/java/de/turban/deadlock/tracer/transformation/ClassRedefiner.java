@@ -9,6 +9,7 @@ import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -59,30 +60,19 @@ public class ClassRedefiner {
 
     private static byte[] getBytes(Class<?> reentLock) throws IOException {
 
-        String property = System.getProperty(BOOT_PATH_PROPERTY);
-        if (property == null || property.isEmpty()) {
-            throw new IllegalStateException("Could not find System property " + BOOT_PATH_PROPERTY + ".");
+        InputStream is = ClassLoader.getSystemClassLoader().getResourceAsStream(REENTRANT_LOCK_CLASS + TransformationConstants.CLASS_FILE_SUFFIX);
+        if( is == null){
+            throw new IllegalStateException("Could not find ReentrantLock Class data in running Java VM."
+                    + ". The data is needed for ReentrantLock instrumentation.");
         }
-        String[] split = property.split(";");
-        for (String str : split) {
-            if (str.endsWith(".jar")) {
-                Path jarPath = Paths.get(str);
-                if (Files.isRegularFile(jarPath)) {
-                    try (JarFile jar = new JarFile(jarPath.toFile())) {
-                        ZipEntry entry = jar.getEntry(REENTRANT_LOCK_CLASS + CLASS_FILE_SUFFIX);
-                        if (entry != null) {
-                            InputStream is = jar.getInputStream(entry);
-                            return getBytesFromStream(is);
-                        }
-                    }
-                }
-            }
+        try {
+            return getBytesFromStream(is);
+        }finally {
+            is.close();
         }
-        throw new IllegalStateException("Could not find rt.jar file in " + BOOT_PATH_PROPERTY
-                + ". The Rt.jar is needed for ReentrantLock instrumentation. Current content: " + property);
     }
 
-    public static byte[] getBytesFromStream(InputStream input) throws IOException {
+    private static byte[] getBytesFromStream(InputStream input) throws IOException {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         byte[] buffer = new byte[1024];
         int n = 0;

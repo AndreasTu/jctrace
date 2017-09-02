@@ -13,6 +13,8 @@ dependencies {
 
 
 task runUI(type: JavaExec) {
+  group "Run"
+  description "Starts the UI to display the database specified with -PdbFile=Deadlock.db"
   classpath = sourceSets.main.runtimeClasspath
 
   main = mainClassName
@@ -26,6 +28,7 @@ task runUI(type: JavaExec) {
 }
 
 task runReportXml(type: JavaExec) {
+  group "Run"
   classpath = sourceSets.main.runtimeClasspath
 
   main = 'de.turban.deadlock.tracer.runtime.display.PrintMain'

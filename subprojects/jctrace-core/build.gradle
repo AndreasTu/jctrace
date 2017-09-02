@@ -61,6 +61,9 @@ shadowJar {
     //GNU Trove
     relocate 'gnu.trove', 'de.turban.deadlock.tracer.dep.gnu.trove'
     
+    //slf4j
+    relocate 'org/slf4j', 'de.turban.deadlock.tracer.dep.org.slf4j'
+        
     
     from('../../LICENSES') {
         include '*.LICENSE'
@@ -98,3 +101,5 @@ jar {
         )
     }
 }
+
+apply from:'runMeasurement.gradle'
