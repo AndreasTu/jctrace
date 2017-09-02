@@ -14,7 +14,7 @@ public class DataDeserializerTest {
     public void testDbFromFile() {
 
         DataDeserializer deSer = new DataDeserializer();
-        List<ISerializableData> list = deSer.readData(Paths.get("src/test/java/de/turban/deadlock/tracer/runtime/serdata/Deadlock.db"));
-        assertThat(list.size(), equalTo(7));
+        List<ISerializableData> list = deSer.readData(Paths.get("src/test/resources/Deadlock.db"));
+        assertThat(list.size(), equalTo(375));
     }
 }
