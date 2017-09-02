@@ -12,9 +12,9 @@ In a second step jctrace will calculate if any two locks have any threads, where
 ## Analysis details
 
 Jctrace will instrument and measure the following items:
-* `synchornized` keyword
-  * For any Obejct or Class instance
-* `synchornized` methods
+* `synchronized` keyword
+  * For any `Object` or `Class` instance
+* `synchronized` methods
 * `java.util.concurrent.locks.ReentrantLock`
 * `java.util.concurrent.locks.ReentrantReadWriteLock`
 * `java.util.concurrent.locks.StampedLock`
