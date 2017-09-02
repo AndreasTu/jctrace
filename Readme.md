@@ -92,3 +92,7 @@ gradlew runReportXml -PdbFile=Deadlock.db -PreportFile=DeadlockReport.xml
 * Add instrumentation for Atomic* classes reads and writes to detect data races
 
 
+## Contributors
+ * Creator:
+  * Andreas Turban (GitHub: AndreasTu)
+
