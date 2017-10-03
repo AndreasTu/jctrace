@@ -1,10 +1,7 @@
 package de.turban.deadlock.tracer.runtime.display;
 
-import de.turban.deadlock.tracer.runtime.IDeadlockDataResolver;
-import de.turban.deadlock.tracer.runtime.ILockCacheEntry;
-import de.turban.deadlock.tracer.runtime.ILockStackEntry;
-import de.turban.deadlock.tracer.runtime.ILockerThreadCache;
-import de.turban.deadlock.tracer.runtime.datacollection.LockerLocationCache;
+import de.turban.deadlock.tracer.runtime.*;
+import de.turban.deadlock.tracer.runtime.datacollection.LocationCache;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -33,6 +30,8 @@ public class DeadlockCacheXmlPrinter {
         DeadlockCalculator calc = new DeadlockCalculator(resolver);
         calc.calculateDeadlocks();
         List<ILockCacheEntry> locks = calc.getAllLocksSorted();
+        List<IFieldCacheEntry> fields = calc.getAllFieldsSorted();
+        List<IFieldDescriptor> fieldDescriptors = calc.getAllFieldDescriptorsSorted();
         List<ILockCacheEntry> possibleDeadLocksSorted = calc.getPossibleDeadLocks();
 
         long startTime = System.currentTimeMillis();
@@ -59,6 +58,8 @@ public class DeadlockCacheXmlPrinter {
             appendLine("<DeadLockReport>");
             printMeasuredLocks(locks);
             printPossibleDeadLocks(possibleDeadLocksSorted, false);
+            printMeasuredFields(fields);
+            printFieldDescriptors(fieldDescriptors);
             appendLine("</DeadLockReport>");
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -68,12 +69,90 @@ public class DeadlockCacheXmlPrinter {
 
     }
 
+    private void printMeasuredFields(List<IFieldCacheEntry> fields) throws IOException {
+        if (!fields.isEmpty()) {
+            appendLine("<MeasuredFields>");
+            for (IFieldCacheEntry f : fields) {
+                appendLine("<Field>");
+
+                append("<FieldId>");
+                append(f.getId());
+                appendLine("</FieldId>");
+                append("<FieldDescId>");
+                append(f.getFieldDescriptorId());
+                appendLine("</FieldDescId>");
+
+                IFieldDescriptor desc = getFieldDescriptorById(f.getFieldDescriptorId());
+                append("<FieldName>");
+                appendEsc(desc.getFieldClass() + "." + desc.getFieldName());
+                appendLine("</FieldName>");
+
+
+                append("<OwnerHash>");
+                appendEsc("0x" + Integer.toHexString(f.getOwnerIdentityHash()));
+                appendLine("</OwnerHash>");
+
+                append("<ReadCount>");
+                appendEsc(f.getReadCount());
+                appendLine("</ReadCount>");
+
+                append("<WriteCount>");
+                appendEsc(f.getWriteCount());
+                appendLine("</WriteCount>");
+
+
+                appendLocations(f);
+                appendThreads(f);
+                printStackTraces(f);
+
+                appendLine("</Field>");
+            }
+            appendLine("</MeasuredFields>");
+        }
+    }
+
+
+    private void printFieldDescriptors(List<IFieldDescriptor> fieldDescriptors) throws IOException {
+        if (!fieldDescriptors.isEmpty()) {
+            appendLine("<FieldDescriptors>");
+            for (IFieldDescriptor desc : fieldDescriptors) {
+                appendLine("<FieldDescriptor>");
+
+                append("<FieldDescId>");
+                append(desc.getId());
+                appendLine("</FieldDescId>");
+
+                append("<FieldClass>");
+                appendEsc(desc.getFieldClass());
+                appendLine("</FieldClass>");
+
+                append("<FieldName>");
+                appendEsc(desc.getFieldName());
+                appendLine("</FieldName>");
+
+                append("<IsVolatile>");
+                append(Boolean.valueOf(desc.isVolatile()).toString());
+                append("</IsVolatile>");
+                append("<IsStatic>");
+                append(Boolean.valueOf(desc.isStatic()).toString());
+                appendLine("</IsStatic>");
+
+                append("<Desc>");
+                append(desc.getDesc());
+                appendLine("</Desc>");
+
+                appendLine("</FieldDescriptor>");
+            }
+            appendLine("</FieldDescriptors>");
+        }
+    }
+
     private void printPossibleDeadLocks(List<ILockCacheEntry> possibleDeadLocksSorted, boolean filterLockLocations) throws IOException {
         appendLine("<PossibleDeadLocks>");
         for (ILockCacheEntry lock : possibleDeadLocksSorted) {
 
             if (filterLockLocations) {
-                if (lock.getLockerLocationIds().length == 0) {
+                if (lock.getLocationIds().length == 0) {
                     //Filter locks, which have no location
                     continue;
                 }
@@ -100,21 +179,9 @@ public class DeadlockCacheXmlPrinter {
         append(lock.getLockedCount());
         appendLine("</LockCount>");
 
-        appendLine("<LockerLocations>");
-        for (String cls : getLockerLocations(lock)) {
-            append("<Location>");
-            appendEsc(cls);
-            appendLine("</Location>");
-        }
-        appendLine("</LockerLocations>");
 
-        appendLine("<LockerThreads>");
-        for (String thread : getLockerThreadLocations(lock)) {
-            append("<LockerThread>");
-            appendEsc(thread);
-            appendLine("</LockerThread>");
-        }
-        appendLine("</LockerThreads>");
+        appendLocations(lock);
+        appendThreads(lock);
 
         printDependentLocks(lock.getDependentLocks(), lock);
         printPossibleDependentDeadLocks(lock.getDependentLocks(), lock);
@@ -123,6 +190,7 @@ public class DeadlockCacheXmlPrinter {
 
         appendLine("</Lock>");
     }
+
 
     private void printDependentLocks(int[] dependentLocks, ILockCacheEntry lock) throws IOException {
         append("<DependentLocks>");
@@ -145,7 +213,7 @@ public class DeadlockCacheXmlPrinter {
                 if (!containsLock(depLock, lock.getId())) {
                     append(" lockNotReferencingThis=\"true\"");
                 }
-                if (depLock.getLockerLocationIds().length == 0) {
+                if (depLock.getLocationIds().length == 0) {
                     append(" lockHasNoLocationInfo=\"true\"");
                 }
 
@@ -191,7 +259,7 @@ public class DeadlockCacheXmlPrinter {
                 }
                 appendLine("");
                 append("<DependentLock");
-                if (depLock.getLockerLocationIds().length == 0) {
+                if (depLock.getLocationIds().length == 0) {
                     append(" lockHasNoLocationInfo=\"true\"");
                 }
 
@@ -215,7 +283,7 @@ public class DeadlockCacheXmlPrinter {
         appendLine("<MeasuredLocks>");
         for (ILockCacheEntry lock : locks) {
 
-            if (lock.getLockerLocationIds().length == 0) {
+            if (lock.getLocationIds().length == 0) {
                 //Filter locks, which have no location
                 continue;
             }
@@ -234,21 +302,8 @@ public class DeadlockCacheXmlPrinter {
             append(lock.getLockedCount());
             appendLine("</LockCount>");
 
-            appendLine("<LockerLocations>");
-            for (String cls : getLockerLocations(lock)) {
-                append("<Location>");
-                appendEsc(cls);
-                appendLine("</Location>");
-            }
-            appendLine("</LockerLocations>");
-
-            appendLine("<LockerThreads>");
-            for (String thread : getLockerThreadLocations(lock)) {
-                append("<LockerThread>");
-                appendEsc(thread);
-                appendLine("</LockerThread>");
-            }
-            appendLine("</LockerThreads>");
+            appendLocations(lock);
+            appendThreads(lock);
 
             printDependentLocks(lock.getDependentLocks(), lock);
 
@@ -259,22 +314,24 @@ public class DeadlockCacheXmlPrinter {
         appendLine("</MeasuredLocks>");
     }
 
-    private void printStackTraces(ILockCacheEntry lock) throws IOException {
-        List<ILockStackEntry> stacks = lock.getStackEntries();
+    private void printStackTraces(ICacheEntry entry) throws IOException {
+        List<IStackSample> stacks = entry.getStackSamples();
         if (!stacks.isEmpty()) {
             appendLine("<Callstacks>");
-            appendLine("<PossibleDeadLockCallstacks>");
-            for (ILockStackEntry stack : stacks) {
-                if (hasLockPossibleDeadLocks(stack.getDependentLocks(), lock)) {
-                    printStackEntry(lock, stack);
+            if (entry instanceof ILockCacheEntry) {
+                ILockCacheEntry lock = (ILockCacheEntry) entry;
+                appendLine("<PossibleDeadLockCallstacks>");
+                for (IStackSample stack : stacks) {
+                    if (hasLockPossibleDeadLocks(stack.getDependentLocks(), lock)) {
+                        printStackEntry(lock, stack);
+                    }
                 }
-
+                appendLine("</PossibleDeadLockCallstacks>");
             }
-            appendLine("</PossibleDeadLockCallstacks>");
 
             appendLine("<AllCallstacks>");
-            for (ILockStackEntry stack : stacks) {
-                printStackEntry(lock, stack);
+            for (IStackSample stack : stacks) {
+                printStackEntry(entry, stack);
 
             }
             appendLine("</AllCallstacks>");
@@ -282,10 +339,30 @@ public class DeadlockCacheXmlPrinter {
         }
     }
 
-    private void printStackEntry(ILockCacheEntry lock, ILockStackEntry stack) throws IOException {
+    private void appendThreads(ICacheEntry lock) throws IOException {
+        appendLine("<LockerThreads>");
+        for (String thread : getLockerThreadLocations(lock)) {
+            append("<LockerThread>");
+            appendEsc(thread);
+            appendLine("</LockerThread>");
+        }
+        appendLine("</LockerThreads>");
+    }
+
+    private void appendLocations(ICacheEntry f) throws IOException {
+        appendLine("<LockerLocations>");
+        for (String cls : getLockerLocations(f)) {
+            append("<Location>");
+            appendEsc(cls);
+            appendLine("</Location>");
+        }
+        appendLine("</LockerLocations>");
+    }
+
+    private void printStackEntry(ICacheEntry entry, IStackSample stack) throws IOException {
         appendLine("<CallstackEntry>");
-        int lockerLocationId = stack.getLockerLocationId();
-        if (lockerLocationId != LockerLocationCache.INVALID_ID) {
+        int lockerLocationId = stack.getLocationId();
+        if (lockerLocationId != LocationCache.INVALID_LOCATION_ID) {
             append("<Location>");
             appendEsc(getLocationById(lockerLocationId).toString());
             appendLine("</Location>");
@@ -293,15 +370,18 @@ public class DeadlockCacheXmlPrinter {
         }
 
 
-        int lockerThreadId = stack.getLockerThreadId();
-        if (lockerThreadId != LockerLocationCache.INVALID_ID) {
+        int lockerThreadId = stack.getThreadId();
+        if (lockerThreadId != LocationCache.INVALID_LOCATION_ID) {
             append("<LockerThread>");
             appendEsc(getThreadById(lockerThreadId));
             appendLine("</LockerThread>");
         }
 
-        printDependentLocks(stack.getDependentLocks(), lock);
-        printPossibleDependentDeadLocks(stack.getDependentLocks(), lock);
+        if (entry instanceof ILockCacheEntry) {
+            ILockCacheEntry lock = (ILockCacheEntry) entry;
+            printDependentLocks(stack.getDependentLocks(), lock);
+            printPossibleDependentDeadLocks(stack.getDependentLocks(), lock);
+        }
 
         append("<Stacktrace>");
         for (StackTraceElement elem : stack.getStackTrace()) {
@@ -319,7 +399,7 @@ public class DeadlockCacheXmlPrinter {
             for (int depLockId : stack.getDependentLocks()) {
                 ILockCacheEntry depLock = resolver.getLockCache().getLockById(depLockId);
                 if (depLock != null) {
-                    for (int locId : depLock.getLockerLocationIds()) {
+                    for (int locId : depLock.getLocationIds()) {
                         StackTraceElement traceElement = getLocationById(locId);
                         if (traceElement != null) {
                             if (elem.getClassName().equals(traceElement.getClassName())) {
@@ -338,7 +418,7 @@ public class DeadlockCacheXmlPrinter {
             append("</Frame>");
 
         }
-        append("</Stacktrace>");
+        appendLine("</Stacktrace>");
         appendLine("</CallstackEntry>");
     }
 
@@ -348,6 +428,10 @@ public class DeadlockCacheXmlPrinter {
 
     private void appendEsc(String content) throws IOException {
         writer.append(escapeXml(content));
+    }
+
+    private void appendEsc(Long content) throws IOException {
+        writer.append(escapeXml(content.toString()));
     }
 
     private String escapeXml(String content) {
@@ -383,9 +467,9 @@ public class DeadlockCacheXmlPrinter {
         writer.append("\r\n");
     }
 
-    private List<String> getLockerThreadLocations(ILockCacheEntry lock) {
-        ILockerThreadCache cache = resolver.getThreadCache();
-        int[] lockerThreadIds = lock.getLockerThreadIds();
+    private List<String> getLockerThreadLocations(ICacheEntry cacheEntry) {
+        IThreadCache cache = resolver.getThreadCache();
+        int[] lockerThreadIds = cacheEntry.getThreadIds();
         List<String> lst = new ArrayList<>(lockerThreadIds.length);
 
         for (int id : lockerThreadIds) {
@@ -397,8 +481,8 @@ public class DeadlockCacheXmlPrinter {
 
     }
 
-    private List<String> getLockerLocations(ILockCacheEntry lock) {
-        int[] lockerLocationIds = lock.getLockerLocationIds();
+    private List<String> getLockerLocations(ICacheEntry cacheEntry) {
+        int[] lockerLocationIds = cacheEntry.getLocationIds();
         List<String> lst = new ArrayList<>(lockerLocationIds.length);
 
         for (int id : lockerLocationIds) {
@@ -411,6 +495,10 @@ public class DeadlockCacheXmlPrinter {
 
     private StackTraceElement getLocationById(int id) {
         return resolver.getLocationCache().getLocationById(id);
+    }
+
+    private IFieldDescriptor getFieldDescriptorById(int id) {
+        return resolver.getFieldDescriptorCache().getFieldDescriptorById(id);
     }
 
     private String getThreadById(int id) {

@@ -2,14 +2,17 @@ package de.turban.deadlock.tracer;
 
 import de.turban.deadlock.tracer.runtime.datacollection.DeadlockCollectBindingResolver;
 import de.turban.deadlock.tracer.runtime.datacollection.IDeadlockCollectBindingResolver;
-import de.turban.deadlock.tracer.runtime.datacollection.LockerLocationCache;
+import de.turban.deadlock.tracer.runtime.datacollection.LocationCache;
 import de.turban.deadlock.tracer.runtime.datacollection.PerThreadData;
 import de.turban.deadlock.tracer.transformation.DeadlockTracerTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
+// Usages of this class are automatically generate and can't be seen by the IDE so we have to suppress the warnings
+@SuppressWarnings({"UnusedReturnValue", "WeakerAccess", "unused"})
 public class DeadlockTracerClassBinding {
 
     public static final String TRACER_PKG = "de.turban.deadlock.tracer";
@@ -27,12 +30,7 @@ public class DeadlockTracerClassBinding {
         return logger;
     }
 
-    private static ThreadLocal<PerThreadData> running = new ThreadLocal<PerThreadData>() {
-        @Override
-        protected PerThreadData initialValue() {
-            return new PerThreadData(getBindingResolver());
-        }
-    };
+    private static ThreadLocal<PerThreadData> running = ThreadLocal.withInitial(() -> new PerThreadData(getBindingResolver()));
 
     static IDeadlockCollectBindingResolver getBindingResolver() {
         return DeadlockCollectBindingResolver.INSTANCE;
@@ -42,16 +40,17 @@ public class DeadlockTracerClassBinding {
      * This method shall only be called by the {@link DeadlockTracerTransformer}. Never called by runtime code! That is the reason that it has no exception
      * handling.
      *
-     * @param className
-     * @param methodName
-     * @param fileName
-     * @param lineNr
-     * @return a new location id as integer
-     * @see LockerLocationCache
+     * @param className  className of the Location
+     * @param methodName methodName of the Location
+     * @param fileName   fileName of the Location or <code>null</code>
+     * @param lineNr     lineNumber if available
+     * @return a new location id as integer, negative if not existing
+     * @see LocationCache
      */
     public static int newLocation(String className, String methodName, String fileName, int lineNr) {
         return getBindingResolver().getLocationCache().newLocation(new StackTraceElement(className, methodName, fileName, lineNr));
     }
+
 
     public static <T> T runWithTracingDisabled(Supplier<T> code) {
         PerThreadData info = running.get();
@@ -82,7 +81,8 @@ public class DeadlockTracerClassBinding {
         }
     }
 
-    public static void checkForOccuredException() {
+    @SuppressWarnings("WeakerAccess")
+    public static void checkForOccurredException() {
         PerThreadData info = running.get();
         if (info.startTraceIfNotAlready()) {
             return;
@@ -171,18 +171,17 @@ public class DeadlockTracerClassBinding {
      * Intrinsic monitors
      * --------------------
      */
-
-    public static void monitorEnter(Object lockObj, int lockerLocationId) {
+    public static void monitorEnter(Object lockObj, int locationId) {
         PerThreadData info = running.get();
         if (info.startTraceIfNotAlready()) {
             return;
         }
         try {
             if (LOGGER_TRACE_STATIC_ENABLED) {
-                log().trace("MonitorEnter " + lockObj + " locationId: " + lockerLocationId);
+                log().trace("MonitorEnter " + lockObj + " locationId: " + locationId);
             }
 
-            info.monitorEnter(lockObj, lockerLocationId);
+            info.monitorEnter(lockObj, locationId);
         } catch (Throwable ex) {
             handleException(info, "monitorEnter", ex);
         } finally {
@@ -214,5 +213,54 @@ public class DeadlockTracerClassBinding {
         }
         log().error("Could not process class " + method + "(). Exception occurred", ex);
     }
+
+
+    /*
+    * -------------------
+    * FieldAccess methods
+    * --------------------
+    */
+    public static int newField(String className, String fieldName, String desc, int asmAccessFlags, boolean isFromField) {
+        return getBindingResolver().getFieldDescriptorCache().newFieldDescriptor(className, fieldName, desc, asmAccessFlags, isFromField);
+    }
+
+    public static void getField(@Nullable Object owner, int fieldDescriptorId, int locationId) {
+        PerThreadData info = running.get();
+        if (info.startTraceIfNotAlready()) {
+            return;
+        }
+        try {
+            if (LOGGER_TRACE_STATIC_ENABLED) {
+                log().trace("getField " + fieldDescriptorId + " on " + owner + " at " + locationId);
+            }
+
+            info.getField(owner, fieldDescriptorId, locationId);
+
+        } catch (Throwable ex) {
+            handleException(info, "getField", ex);
+        } finally {
+            info.stopTrace();
+        }
+    }
+
+    public static void putField(@Nullable Object owner, int fieldDescriptorId, int locationId) {
+        PerThreadData info = running.get();
+        if (info.startTraceIfNotAlready()) {
+            return;
+        }
+        try {
+            if (LOGGER_TRACE_STATIC_ENABLED) {
+                log().trace("putField " + fieldDescriptorId + " on " + owner + " at " + locationId);
+            }
+
+            info.setField(owner, fieldDescriptorId, locationId);
+
+        } catch (Throwable ex) {
+            handleException(info, "putField", ex);
+        } finally {
+            info.stopTrace();
+        }
+    }
+
 
 }

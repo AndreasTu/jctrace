@@ -85,6 +85,6 @@ public class DeadlockCachePerformanceTest {
                 DeadlockTracerClassBinding.monitorExit(obj);
             }
         }
-        DeadlockTracerClassBinding.checkForOccuredException();
+        DeadlockTracerClassBinding.checkForOccurredException();
     }
 }

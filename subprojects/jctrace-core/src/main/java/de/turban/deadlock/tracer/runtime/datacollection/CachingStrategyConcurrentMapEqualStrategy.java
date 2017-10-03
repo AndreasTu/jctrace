@@ -8,21 +8,22 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 
+import de.turban.deadlock.tracer.runtime.ICacheEntry;
 import de.turban.deadlock.tracer.runtime.ILockCacheEntry;
 
-public class LockCachingStrategyConcurrentMapEqualStrategy implements ILockCachingStrategy {
+public class CachingStrategyConcurrentMapEqualStrategy<C extends ICacheEntry,T extends IThreadEntry> implements ICachingStrategy<C,T> {
 
-    private final ConcurrentMap<EqualStrategy, ILockCacheEntry> cache = new ConcurrentHashMap<>();
-    private final Function<ILockThreadEntry, ILockCacheEntry> factory;
+    private final ConcurrentMap<EqualStrategy, C> cache = new ConcurrentHashMap<>();
+    private final Function<T, C> factory;
 
-    LockCachingStrategyConcurrentMapEqualStrategy(Function<ILockThreadEntry, ILockCacheEntry> factory) {
+    CachingStrategyConcurrentMapEqualStrategy(Function<T, C> factory) {
         this.factory = factory;
 
     }
 
     @Override
-    public ILockCacheEntry getLockCacheEntryOrCreate(ILockThreadEntry lockThreadEntry) {
-        ILockCacheEntry lockEntry = getLockCacheEntryUnsafe(lockThreadEntry);
+    public C getCacheEntryOrCreate(T lockThreadEntry) {
+        C lockEntry = getCacheEntryUnsafe(lockThreadEntry);
         if (lockEntry == null) {
             lockEntry = createNewEntry(lockThreadEntry);
         }
@@ -30,15 +31,15 @@ public class LockCachingStrategyConcurrentMapEqualStrategy implements ILockCachi
     }
 
     @Override
-    public ILockCacheEntry getLockCacheEntryUnsafe(ILockThreadEntry lockThreadEntry) {
-        ILockCacheEntry lockEntry = cache.get(new EqualStrategy(lockThreadEntry.getLock()));
+    public C getCacheEntryUnsafe(T lockThreadEntry) {
+        C lockEntry = cache.get(new EqualStrategy(lockThreadEntry.getObject()));
         return lockEntry;
     }
 
-    private ILockCacheEntry createNewEntry(ILockThreadEntry lockThreadEntry) {
-        ILockCacheEntry newLockEntry = factory.apply(lockThreadEntry);
-        LockWeakRef weakRef = lockThreadEntry.getLockWeakReference();
-        ILockCacheEntry oldlockEntry = cache.putIfAbsent(new EqualStrategy(weakRef), newLockEntry);
+    private C createNewEntry(T threadEntry) {
+        C newLockEntry = factory.apply(threadEntry);
+        LockWeakRef weakRef = threadEntry.getLockWeakReference();
+        C oldlockEntry = cache.putIfAbsent(new EqualStrategy(weakRef), newLockEntry);
         if (oldlockEntry != null) {
             return oldlockEntry;
         }
@@ -46,18 +47,18 @@ public class LockCachingStrategyConcurrentMapEqualStrategy implements ILockCachi
     }
 
     @Override
-    public List<ILockCacheEntry> getLockEntries() {
+    public List<C> getEntries() {
         return new ArrayList<>(cache.values());
     }
 
     @Override
-    public List<ILockCacheEntry> getLockEntriesExpungeStallEntries() {
+    public List<C> getEntriesExpungeStallEntries() {
 
-        List<ILockCacheEntry> list = new ArrayList<>();
-        for (Iterator<Entry<EqualStrategy, ILockCacheEntry>> iterator = cache.entrySet().iterator(); iterator.hasNext();) {
-            Entry<EqualStrategy, ILockCacheEntry> entry = iterator.next();
+        List<C> list = new ArrayList<>();
+        for (Iterator<Entry<EqualStrategy, C>> iterator = cache.entrySet().iterator(); iterator.hasNext();) {
+            Entry<EqualStrategy, C> entry = iterator.next();
             EqualStrategy key = entry.getKey();
-            ILockCacheEntry value = entry.getValue();
+            C value = entry.getValue();
             list.add(value);
             LockWeakRef wRef = (LockWeakRef) key.obj;
             if (wRef.get() == null) {

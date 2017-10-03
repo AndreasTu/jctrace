@@ -1,6 +1,7 @@
 package de.turban.deadlock.tracer.transformation;
 
 import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.commons.TryCatchBlockSorter;
@@ -13,7 +14,7 @@ class DeadlockTraceClassVisitor extends ClassVisitor {
     private String classNameJavaStyle;
 
     DeadlockTraceClassVisitor(ClassVisitor cv) {
-        super(Opcodes.ASM5, cv);
+        super(Opcodes.ASM6, cv);
 
     }
 
@@ -27,9 +28,13 @@ class DeadlockTraceClassVisitor extends ClassVisitor {
         }
 
         this.className = name;
-        this.classNameJavaStyle = className.replace('/', '.');
+        this.classNameJavaStyle = classNameJavaStyle(className);
 
         super.visit(this.version, access, name, signature, superName, interfaces);
+    }
+
+    static String classNameJavaStyle(String className) {
+        return className.replace('/', '.');
     }
 
     @Override
@@ -39,9 +44,18 @@ class DeadlockTraceClassVisitor extends ClassVisitor {
     }
 
     @Override
+    public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
+        FieldVisitor fv = super.visitField(access, name, desc, signature, value);
+        fv = new FieldCollectVisitor(fv,className, classNameJavaStyle, sourceFile, access, name, desc);
+
+        return fv;
+    }
+
+    @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
         mv = new MonitorEnterExitMethodVisitor(mv, className, classNameJavaStyle, sourceFile, access, name, desc);
+        mv = new FieldGetSetMethodVisitor(mv, className, classNameJavaStyle, sourceFile, access, name, desc);
         boolean hasSyncFlag = (access & Opcodes.ACC_SYNCHRONIZED) != 0;
         if (hasSyncFlag) {
             TryCatchBlockSorter tryCatchSorter = new TryCatchBlockSorter(mv, access, name, desc, signature, exceptions);
@@ -52,5 +66,7 @@ class DeadlockTraceClassVisitor extends ClassVisitor {
         }
         return mv;
     }
+
+
 
 }

@@ -1,19 +1,19 @@
 package de.turban.deadlock.tracer.runtime.serdata;
 
 import de.turban.deadlock.tracer.runtime.ILockCacheEntry;
-import de.turban.deadlock.tracer.runtime.ILockStackEntry;
+import de.turban.deadlock.tracer.runtime.IStackSample;
 import gnu.trove.set.hash.TIntHashSet;
 
+import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 @Immutable
-public final class LockCacheEntrySer implements ILockCacheEntry, ISerializableData {
-    private static final long serialVersionUID = -1720986290475958777L;
+public final class LockCacheEntrySer implements ILockCacheEntry, ISerializableData, IHasStacksamples {
+    private static final long serialVersionUID = 1L;
 
     private final String lockClass;
 
@@ -29,7 +29,7 @@ public final class LockCacheEntrySer implements ILockCacheEntry, ISerializableDa
 
     private final int[] dependentLocks;
 
-    private final List<ILockStackEntry> stackEntries;
+    private final List<IStackSample> stackSamples;
 
     private transient TIntHashSet dependentLockSet;
 
@@ -39,10 +39,10 @@ public final class LockCacheEntrySer implements ILockCacheEntry, ISerializableDa
         this.lockClass = entry.getLockClass();
         this.revision = revision;
         this.lockedCount = entry.getLockedCount();
-        this.lockerLocationIds = entry.getLockerLocationIds();
-        this.lockerThreadIds = entry.getLockerThreadIds();
+        this.lockerLocationIds = entry.getLocationIds();
+        this.lockerThreadIds = entry.getThreadIds();
         this.dependentLocks = entry.getDependentLocks();
-        this.stackEntries = entry.getStackEntries();
+        this.stackSamples = entry.getStackSamples();
 
     }
 
@@ -54,13 +54,8 @@ public final class LockCacheEntrySer implements ILockCacheEntry, ISerializableDa
         this.lockerLocationIds = new int[0];
         this.lockerThreadIds = new int[0];
         this.dependentLocks = new int[0];
-        this.stackEntries = new ArrayList<>();
+        this.stackSamples = new ArrayList<>();
 
-    }
-
-    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-        return;
     }
 
     @Override
@@ -106,23 +101,14 @@ public final class LockCacheEntrySer implements ILockCacheEntry, ISerializableDa
             return false;
         }
         ILockCacheEntry other = (ILockCacheEntry) obj;
-        if (id != other.getId()) {
-            return false;
-        }
-        return true;
+        return id == other.getId();
     }
 
     @Override
-    public int compareTo(ILockCacheEntry o) {
+    public int compareTo(@Nonnull  ILockCacheEntry o) {
         int id1 = this.getId();
         int id2 = o.getId();
-        if (id1 == id2) {
-            return 0;
-        }
-        if (id1 < id2) {
-            return -1;
-        }
-        return 1;
+        return Integer.compare(id1, id2);
     }
 
     @Override
@@ -141,12 +127,12 @@ public final class LockCacheEntrySer implements ILockCacheEntry, ISerializableDa
     }
 
     @Override
-    public int[] getLockerLocationIds() {
+    public int[] getLocationIds() {
         return lockerLocationIds.clone();
     }
 
     @Override
-    public int[] getLockerThreadIds() {
+    public int[] getThreadIds() {
         return lockerThreadIds.clone();
     }
 
@@ -156,8 +142,8 @@ public final class LockCacheEntrySer implements ILockCacheEntry, ISerializableDa
     }
 
     @Override
-    public List<ILockStackEntry> getStackEntries() {
-        return Collections.unmodifiableList(stackEntries);
+    public List<IStackSample> getStackSamples() {
+        return Collections.unmodifiableList(stackSamples);
     }
 
     @Override
@@ -165,12 +151,11 @@ public final class LockCacheEntrySer implements ILockCacheEntry, ISerializableDa
         return "LockCacheEntrySer [id=" + id + ", lockClass=" + lockClass + ", lockedCount=" + lockedCount + "]";
     }
 
-    public void addStacks(List<ILockStackEntry> stackEntriesFromOld) {
-        for (ILockStackEntry e : stackEntriesFromOld) {
-            if (!stackEntries.contains(e)) {
-                stackEntries.add(e);
+    public void addStacks(List<? extends IStackSample> stackEntriesFromOld) {
+        for (IStackSample stack : stackEntriesFromOld) {
+            if (!stackSamples.contains(stack)) {
+                stackSamples.add(stack);
             }
         }
     }
-
 }

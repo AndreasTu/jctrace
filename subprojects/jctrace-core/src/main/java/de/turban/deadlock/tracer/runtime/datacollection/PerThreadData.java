@@ -1,14 +1,19 @@
 package de.turban.deadlock.tracer.runtime.datacollection;
 
 import de.turban.deadlock.tracer.DeadlockTracerClassBinding;
+import de.turban.deadlock.tracer.runtime.ILocationCache;
+import de.turban.deadlock.tracer.runtime.IThreadCache;
 import de.turban.deadlock.tracer.transformation.TransformationBlacklist;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import static java.util.Objects.requireNonNull;
 
 @NotThreadSafe // But ThreadLocal Data
 public class PerThreadData {
@@ -17,18 +22,23 @@ public class PerThreadData {
 
     private Throwable lastException;
 
-    private boolean traceRunning = false;
+    private boolean traceRunning;
 
-    private int threadId = LockerThreadCache.INVALID_THREAD_ID;
+    private boolean isTraceCollectorThread;
 
-    private int currentLockerLocationId = LockerLocationCache.INVALID_ID;
+    private int threadId = IThreadCache.INVALID_THREAD_ID;
+
+    private int currentLocationId = ILocationCache.INVALID_LOCATION_ID;
 
     private WeakReference<Object> currentLockerLockObj = null;
 
     private final LinkedList<ILockThreadEntry> heldLocks = new LinkedList<>();
 
     public PerThreadData(IDeadlockCollectBindingResolver resolver) {
+
         this.resolver = resolver;
+        this.isTraceCollectorThread = Thread.currentThread() instanceof DeadlockCollector.CollectorThread;
+        this.traceRunning = isTraceCollectorThread;
     }
 
     private IDeadlockCollectBindingResolver getBindingResolver() {
@@ -37,12 +47,12 @@ public class PerThreadData {
 
     private static class LockThreadEntry implements ILockThreadEntry {
         final Object lock;
-        final int lockerLocationId; // Note: could also be LockerLocationCache.INVALID_ID
+        final int lockerLocationId; // Note: could also be ILocationCache.INVALID_LOCATION_ID
         final int lockerThreadId;
         int lockCount = 0;
         volatile LockWeakRef lockWeak;
 
-        public LockThreadEntry(Object lock, int lockerLocationId, int lockerThreadId) {
+        LockThreadEntry(Object lock, int lockerLocationId, int lockerThreadId) {
             this.lock = lock;
             this.lockerLocationId = lockerLocationId;
             this.lockerThreadId = lockerThreadId;
@@ -54,12 +64,17 @@ public class PerThreadData {
         }
 
         @Override
-        public int getLockerLocationId() {
+        public Object getObject() {
+            return getLock();
+        }
+
+        @Override
+        public int getLocationId() {
             return lockerLocationId;
         }
 
         @Override
-        public int getLockerThreadId() {
+        public int getThreadId() {
             return lockerThreadId;
         }
 
@@ -79,6 +94,61 @@ public class PerThreadData {
 
     }
 
+    private static class FieldThreadEntry implements IFieldThreadEntry {
+        final Object owner;
+        final int fieldDescriptorId;
+        final int locationId; // Note: could also be ILocationCache.INVALID_LOCATION_ID
+        final int threadId;
+        volatile LockWeakRef lockWeak;
+
+        FieldThreadEntry(Object owner, int fieldDescriptorId, int locationId, int threadId) {
+            this.owner = owner;
+            this.fieldDescriptorId = fieldDescriptorId;
+            this.locationId = locationId;
+            this.threadId = threadId;
+        }
+
+        @Override
+        public Object getOwner() {
+            return owner;
+        }
+
+        @Override
+        public Object getObject() {
+            return getOwner();
+        }
+
+        @Override
+        public int getLocationId() {
+            return locationId;
+        }
+
+        @Override
+        public int getThreadId() {
+            return threadId;
+        }
+
+        @Override
+        public int getFieldDescriptorId() {
+            return fieldDescriptorId;
+        }
+
+        @Override
+        public LockWeakRef getLockWeakReference() {
+            if (lockWeak == null) {
+                this.lockWeak = new LockWeakRef(getOwner());
+            }
+            return lockWeak;
+        }
+
+        @Override
+        public String toString() {
+            return "FieldThreadEntry [owner=" + getOwner() + ", fieldDescriptorId=" + fieldDescriptorId + ", lockerLocationId=" + locationId + ", lockerThreadId=" + threadId + "]";
+        }
+
+    }
+
+    @SuppressWarnings("WeakerAccess")
     public boolean isTraceRunning() {
         return traceRunning;
     }
@@ -93,7 +163,7 @@ public class PerThreadData {
     }
 
     private void processThreadInfo() {
-        if (threadId == LockerThreadCache.INVALID_THREAD_ID) {
+        if (threadId == IThreadCache.INVALID_THREAD_ID) {
             publishThreadInfo();
         }
     }
@@ -106,16 +176,19 @@ public class PerThreadData {
         if (!isTraceRunning()) {
             throw new IllegalStateException();
         }
+        if (isTraceCollectorThread) {
+            throw new IllegalStateException();
+        }
         traceRunning = false;
     }
 
     /**
-     * @param lockObj
-     * @param lockerLocationId the location id {@link LockerLocationCache#INVALID_ID} is permitted.
+     * @param lockObj          the monitor where the monitor enter was called
+     * @param lockerLocationId the location id {@link ILocationCache#INVALID_LOCATION_ID} is permitted.
      */
     public void monitorEnter(Object lockObj, int lockerLocationId) {
-        Objects.requireNonNull(lockObj);
-        LockThreadEntry entry = findElement(lockObj, lockerLocationId, true);
+        requireNonNull(lockObj);
+        LockThreadEntry entry = requireNonNull(findElement(lockObj, lockerLocationId, true));
         entry.lockCount++;
         if (entry.lockCount == 1) {
             newLockMonitorEnter(entry);
@@ -144,10 +217,10 @@ public class PerThreadData {
     }
 
     public void monitorExit(Object lockObj) {
-        Objects.requireNonNull(lockObj);
+        requireNonNull(lockObj);
 
         LockThreadEntry lockEntry = findElement(lockObj, 0, false);
-        Objects.requireNonNull(lockEntry);
+        requireNonNull(lockEntry);
         lockEntry.lockCount--;
         int lockC = lockEntry.lockCount;
         if (lockC == 0) {
@@ -156,13 +229,13 @@ public class PerThreadData {
     }
 
     private void newLockMonitorEnter(LockThreadEntry lockEntry) {
-        ILockThreadEntry[] array = heldLocks.toArray(new LockThreadEntry[heldLocks.size()]);
+        ILockThreadEntry[] array = heldLocks.toArray(new ILockThreadEntry[heldLocks.size()]);
         getBindingResolver().getCacheSubmitter().newLockMonitorEnter(lockEntry, array);
 
     }
 
     private void newLockCreated(LockThreadEntry lockEntry) {
-        ILockThreadEntry[] array = heldLocks.toArray(new LockThreadEntry[heldLocks.size()]);
+        ILockThreadEntry[] array = heldLocks.toArray(new ILockThreadEntry[heldLocks.size()]);
         getBindingResolver().getCacheSubmitter().newLockCreated(lockEntry, array);
 
     }
@@ -184,12 +257,12 @@ public class PerThreadData {
     }
 
     public void lockNewLocationId(Object lockObj, int lockerLocationId) {
-        if (lockerLocationId != LockerLocationCache.INVALID_ID) {
-            currentLockerLocationId = lockerLocationId;
+        if (lockerLocationId != ILocationCache.INVALID_LOCATION_ID) {
+            currentLocationId = lockerLocationId;
             if (lockObj instanceof ReentrantReadWriteLock.ReadLock || lockObj instanceof ReentrantReadWriteLock.WriteLock) {
                 lockObj = getSyncObjOfReadWriteLock(lockObj);
             }
-            currentLockerLockObj = new WeakReference<Object>(lockObj);
+            currentLockerLockObj = new WeakReference<>(lockObj);
         }
     }
 
@@ -205,12 +278,12 @@ public class PerThreadData {
     }
 
     public void lockEnter(Object lockObj) {
-        int lockLocationId = currentLockerLocationId;
+        int lockLocationId = currentLocationId;
         if (currentLockerLockObj == null || currentLockerLockObj.get() != lockObj) {
             //Wrong lock so the location does not match
-            lockLocationId = LockerLocationCache.INVALID_ID;
+            lockLocationId = ILocationCache.INVALID_LOCATION_ID;
         }
-        // Note currentLockerLocationId could also be LockerLocationCache.INVALID_ID
+        // Note currentLocationId could also be ILocationCache.INVALID_LOCATION_ID
         monitorEnter(lockObj, lockLocationId);
     }
 
@@ -223,7 +296,7 @@ public class PerThreadData {
             return;
         }
         int creationLocationId = getBindingResolver().getLocationCache().getOrCreateIdByLocation(elem);
-        if (creationLocationId == LockerLocationCache.INVALID_ID) {
+        if (creationLocationId == LocationCache.INVALID_LOCATION_ID) {
             return;
         }
         LockThreadEntry newEntry = new LockThreadEntry(lockObj, creationLocationId, threadId);
@@ -233,7 +306,7 @@ public class PerThreadData {
     @Nullable
     private StackTraceElement createStackFrame() {
         StackTraceElement[] stackTraceLoc = new Throwable().getStackTrace();
-        List<StackTraceElement> lst = new ArrayList<>();
+        //noinspection ForLoopReplaceableByForEach
         for (int i = 0; i < stackTraceLoc.length; i++) {
             StackTraceElement e = stackTraceLoc[i];
             if (!e.getClassName().startsWith(DeadlockTracerClassBinding.TRACER_PKG)) {
@@ -247,6 +320,23 @@ public class PerThreadData {
 
     public void lockExit(Object lockObj) {
         monitorExit(lockObj);
+    }
+
+
+    public void getField(@Nullable Object owner, int fieldDescriptorId, int locationId) {
+        requireNonNull(owner);
+        FieldThreadEntry entry = new FieldThreadEntry(owner, fieldDescriptorId, locationId, threadId);
+
+        ILockThreadEntry[] array = heldLocks.toArray(new ILockThreadEntry[heldLocks.size()]);
+        getBindingResolver().getCacheSubmitter().newFieldGet(entry, array);
+    }
+
+    public void setField(@Nullable Object owner, int fieldDescriptorId, int locationId) {
+        requireNonNull(owner);
+        FieldThreadEntry entry = new FieldThreadEntry(owner, fieldDescriptorId, locationId, threadId);
+
+        ILockThreadEntry[] array = heldLocks.toArray(new ILockThreadEntry[heldLocks.size()]);
+        getBindingResolver().getCacheSubmitter().newFieldSet(entry, array);
     }
 
     public void checkForOccurredException() {

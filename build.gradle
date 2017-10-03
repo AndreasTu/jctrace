@@ -10,6 +10,10 @@ allprojects{
 
     repositories {
         jcenter()
+        maven {
+            // Ow2 ASM repository
+            url 'https://repository.ow2.org/nexus/content/repositories/releases'
+        }
     }
 }
 

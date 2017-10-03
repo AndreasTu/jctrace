@@ -2,7 +2,7 @@ package de.turban.deadlock.tracer.runtime.display.ui;
 
 import de.turban.deadlock.tracer.runtime.IDeadlockDataResolver;
 import de.turban.deadlock.tracer.runtime.ILockCacheEntry;
-import de.turban.deadlock.tracer.runtime.ILockStackEntry;
+import de.turban.deadlock.tracer.runtime.IStackSample;
 import de.turban.deadlock.tracer.runtime.display.ui.model.UiLock;
 import de.turban.deadlock.tracer.runtime.display.ui.model.UiLocks;
 import javafx.collections.FXCollections;
@@ -90,9 +90,9 @@ public class DeadlockViewController {
         IDeadlockDataResolver resolver = lock.getResolver();
         boolean elementAdded = false;
         int x = 1;
-        for (ILockStackEntry stack : lock.getLockCache().getStackEntries()) {
+        for (IStackSample stack : lock.getLockCache().getStackSamples()) {
             if (hasLockPossibleDeadLocks(resolver, stack.getDependentLocks(), lock.getLockCache())) {
-                TreeItem<String> stackEntryTree = new TreeItem<String>("Stack-Entry " + x + " Thread: " + resolver.getThreadCache().getThreadDescriptionById(stack.getLockerThreadId()) + "");
+                TreeItem<String> stackEntryTree = new TreeItem<String>("Stack-Entry " + x + " Thread: " + resolver.getThreadCache().getThreadDescriptionById(stack.getThreadId()) + "");
                 x++;
 
                 stack.getStackTrace().forEach(elem -> {
@@ -105,7 +105,7 @@ public class DeadlockViewController {
                     for (int depLockId : stack.getDependentLocks()) {
                         ILockCacheEntry depLock = resolver.getLockCache().getLockById(depLockId);
                         if (depLock != null) {
-                            for (int locId : depLock.getLockerLocationIds()) {
+                            for (int locId : depLock.getLocationIds()) {
                                 StackTraceElement traceElement = resolver.getLocationCache().getLocationById(locId);
                                 if (traceElement != null) {
                                     if (elem.getClassName().equals(traceElement.getClassName())) {

@@ -1,6 +1,7 @@
 package de.turban.deadlock.tracer.runtime.datacollection.asyncqueue;
 
 import de.turban.deadlock.tracer.runtime.datacollection.IDeadlockGlobalCacheSubmitter;
+import de.turban.deadlock.tracer.runtime.datacollection.IFieldThreadEntry;
 import de.turban.deadlock.tracer.runtime.datacollection.ILockThreadEntry;
 
 import java.util.concurrent.ExecutorService;
@@ -25,6 +26,20 @@ public class DeadlockQueue implements IDeadlockGlobalCacheSubmitter {
     public void newLockMonitorEnter(ILockThreadEntry lockEntry, ILockThreadEntry[] lst) {
         executor.submit(() -> {
             cache.newLockMonitorEnter(lockEntry, lst);
+        });
+    }
+
+    @Override
+    public void newFieldGet(IFieldThreadEntry fieldThreadEntry, ILockThreadEntry[] heldLocks) {
+        executor.submit(() -> {
+            cache.newFieldGet(fieldThreadEntry, heldLocks);
+        });
+    }
+
+    @Override
+    public void newFieldSet(IFieldThreadEntry fieldThreadEntry, ILockThreadEntry[] heldLocks) {
+        executor.submit(() -> {
+            cache.newFieldSet(fieldThreadEntry, heldLocks);
         });
     }
 

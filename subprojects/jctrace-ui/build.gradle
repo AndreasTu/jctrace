@@ -8,7 +8,7 @@ dependencies {
     compile project(':subprojects:jctrace-core')
     
     
-    compile 'com.google.guava:guava:19.0'
+    compile 'com.google.guava:guava:23.0'
 }
 
 

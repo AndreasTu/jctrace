@@ -5,9 +5,13 @@ package de.turban.deadlock.tracer.runtime;
  */
 public interface IDeadlockDataBaseResolver {
 
+    IFieldCache getFieldCache();
+
     ILockCache getLockCache();
 
-    ILockerLocationCache getLocationCache();
+    ILocationCache getLocationCache();
 
-    ILockerThreadCache getThreadCache();
+    IThreadCache getThreadCache();
+
+    IFieldDescriptorCache getFieldDescriptorCache();
 }

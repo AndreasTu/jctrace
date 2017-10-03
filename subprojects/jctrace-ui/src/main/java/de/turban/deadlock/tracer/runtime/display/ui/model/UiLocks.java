@@ -12,7 +12,7 @@ public class UiLocks {
 
     public UiLocks(DeadlockCalculator calc) {
         locks = FXCollections.observableArrayList();
-        calc.getPossibleDeadLocks().stream().filter(l -> l.getLockerLocationIds().length != 0).forEach(e -> locks.add(new UiLock(calc.getResolver(), e)));
+        calc.getPossibleDeadLocks().stream().filter(l -> l.getLocationIds().length != 0).forEach(e -> locks.add(new UiLock(calc.getResolver(), e)));
     }
 
     public ObservableList<UiLock> getLocks() {

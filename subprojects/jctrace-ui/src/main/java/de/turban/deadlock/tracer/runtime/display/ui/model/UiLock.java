@@ -31,8 +31,8 @@ public class UiLock {
     private String getClassName(ILockCacheEntry lockCache) {
         String lockClass = lockCache.getLockClass();
         if (lockClass.startsWith("java.util.concurrent")) {
-            if (lockCache.getLockerLocationIds().length > 0) {
-                StackTraceElement firstLocation = resolver.getLocationCache().getLocationById(lockCache.getLockerLocationIds()[0]);
+            if (lockCache.getLocationIds().length > 0) {
+                StackTraceElement firstLocation = resolver.getLocationCache().getLocationById(lockCache.getLocationIds()[0]);
                 lockClass = firstLocation.getClassName();
             }
         }
@@ -67,7 +67,7 @@ public class UiLock {
 
     public ObservableList<String> getLocations() {
         List<String> list = Arrays
-                .stream(lockCache.getLockerLocationIds())
+                .stream(lockCache.getLocationIds())
                 .mapToObj(id -> resolver.getLocationCache().getLocationById(id).toString())
                 .collect(Collectors.toList());
         return FXCollections.observableList(list);
@@ -75,7 +75,7 @@ public class UiLock {
 
     public ObservableList<String> getThreads() {
         List<String> list = Arrays
-                .stream(lockCache.getLockerThreadIds())
+                .stream(lockCache.getThreadIds())
                 .mapToObj(id -> resolver.getThreadCache().getThreadDescriptionById(id))
                 .collect(Collectors.toList());
 

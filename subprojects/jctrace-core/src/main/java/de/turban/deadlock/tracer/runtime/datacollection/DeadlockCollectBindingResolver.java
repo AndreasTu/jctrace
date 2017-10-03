@@ -6,13 +6,16 @@ public final class DeadlockCollectBindingResolver implements IDeadlockCollectBin
 
     private volatile DeadlockGlobalCache cacheInternal;
 
-    private final LockerLocationCache locationCache;
+    private final LocationCache locationCache;
 
-    private final LockerThreadCache threadCache;
+    private final ThreadCache threadCache;
+
+    private final FieldDescriptorCache fieldDescriptorCache;
 
     private DeadlockCollectBindingResolver() {
-        locationCache = new LockerLocationCache();
-        threadCache = new LockerThreadCache();
+        locationCache = new LocationCache();
+        fieldDescriptorCache = new FieldDescriptorCache();
+        threadCache = new ThreadCache();
     }
 
     private DeadlockGlobalCache getGlobalCachePrivate() {
@@ -27,11 +30,16 @@ public final class DeadlockCollectBindingResolver implements IDeadlockCollectBin
     }
 
     private DeadlockGlobalCache createGlobalCache() {
-        return DeadlockGlobalCache.create(this, LockCachingStrategyConcurrentMapEqualStrategy::new);
+        return DeadlockGlobalCache.create(this, CachingStrategyConcurrentMapEqualStrategy::new);
     }
 
     @Override
     public IDeadlockGlobalCache getLockCache() {
+        return getGlobalCachePrivate();
+    }
+
+    @Override
+    public IDeadlockGlobalCache getFieldCache() {
         return getGlobalCachePrivate();
     }
 
@@ -41,13 +49,18 @@ public final class DeadlockCollectBindingResolver implements IDeadlockCollectBin
     }
 
     @Override
-    public LockerLocationCache getLocationCache() {
+    public LocationCache getLocationCache() {
         return locationCache;
     }
 
     @Override
-    public LockerThreadCache getThreadCache() {
+    public ThreadCache getThreadCache() {
         return threadCache;
+    }
+
+    @Override
+    public FieldDescriptorCache getFieldDescriptorCache() {
+        return fieldDescriptorCache;
     }
 
 }

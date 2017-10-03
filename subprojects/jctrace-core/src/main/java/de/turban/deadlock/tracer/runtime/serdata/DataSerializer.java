@@ -12,6 +12,8 @@ import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import de.turban.deadlock.tracer.runtime.ICacheEntry;
+import de.turban.deadlock.tracer.runtime.IFieldCacheEntry;
 import de.turban.deadlock.tracer.runtime.ILockCacheEntry;
 import de.turban.deadlock.tracer.runtime.datacollection.IDeadlockCollectBindingResolver;
 
@@ -60,13 +62,10 @@ public class DataSerializer {
     synchronized void serializeAll(OutputStream os, IDeadlockCollectBindingResolver resolver) {
         int revision = incrementAndGetRevision();
         List<ILockCacheEntry> entries = resolver.getLockCache().getLockEntriesExpungeStallEntries();
-        for (ILockCacheEntry e : entries) {
-            ISerializationSnapshotCreator cacheEntry = (ISerializationSnapshotCreator) e;
-            ISerializableData data = cacheEntry.createSerializationSnapshot(revision);
-            if (data != null) {
-                serializeElement(os, data);
-            }
-        }
+        serCacheEntries(os, revision, entries);
+
+        List<IFieldCacheEntry> fieldEntries = resolver.getFieldCache().getFieldEntriesExpungeStallEntries();
+        serCacheEntries(os, revision, fieldEntries);
 
         ISerializableData threads = resolver.getThreadCache().createSerializationSnapshot(revision);
         if (threads != null) {
@@ -76,6 +75,21 @@ public class DataSerializer {
         ISerializableData locations = resolver.getLocationCache().createSerializationSnapshot(revision);
         if (locations != null) {
             serializeElement(os, locations);
+        }
+
+        ISerializableData fieldDescCache = resolver.getFieldDescriptorCache().createSerializationSnapshot(revision);
+        if (fieldDescCache != null) {
+            serializeElement(os, fieldDescCache);
+        }
+    }
+
+    private void serCacheEntries(OutputStream os, int revision, List< ? extends ICacheEntry> entries) {
+        for (ICacheEntry e : entries) {
+            ISerializationSnapshotCreator cacheEntry = (ISerializationSnapshotCreator) e;
+            ISerializableData data = cacheEntry.createSerializationSnapshot(revision);
+            if (data != null) {
+                serializeElement(os, data);
+            }
         }
     }
 

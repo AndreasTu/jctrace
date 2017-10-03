@@ -7,6 +7,7 @@ import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 import de.turban.deadlock.tracer.runtime.datacollection.IDeadlockGlobalCacheSubmitter;
+import de.turban.deadlock.tracer.runtime.datacollection.IFieldThreadEntry;
 import de.turban.deadlock.tracer.runtime.datacollection.ILockThreadEntry;
 
 import java.util.concurrent.ExecutorService;
@@ -45,6 +46,16 @@ public final class DeadlockDisruptor implements IDeadlockGlobalCacheSubmitter {
             throw new IllegalStateException();
         }
         producerLoc.newLockMonitorEnter(lockEntry, heldLocks);
+    }
+
+    @Override
+    public void newFieldGet(IFieldThreadEntry fieldThreadEntry, ILockThreadEntry[] heldLocks) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void newFieldSet(IFieldThreadEntry fieldThreadEntry, ILockThreadEntry[] heldLocks) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

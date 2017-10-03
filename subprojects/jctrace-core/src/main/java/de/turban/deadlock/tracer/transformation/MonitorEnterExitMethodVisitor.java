@@ -5,13 +5,13 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
-public class MonitorEnterExitMethodVisitor extends MethodVisitor {
+class MonitorEnterExitMethodVisitor extends MethodVisitor {
 
     private static final String INT_VOID_DESC = "(I)V";
-    public static final String OBJ_INT_VOID_DESC = "(Ljava/lang/Object;I)V";
-    public static final String OBJ_VOID_DESC = "(Ljava/lang/Object;)V";
+    static final String OBJ_INT_VOID_DESC = "(Ljava/lang/Object;I)V";
+    static final String OBJ_VOID_DESC = "(Ljava/lang/Object;)V";
 
-    public static final String TRACER_STATIC_CLASS = de.turban.deadlock.tracer.DeadlockTracerClassBinding.TRACER_STATIC_CLASS;
+    static final String TRACER_STATIC_CLASS = de.turban.deadlock.tracer.DeadlockTracerClassBinding.TRACER_STATIC_CLASS;
 
     @SuppressWarnings("unused")
     private String className;
@@ -24,9 +24,9 @@ public class MonitorEnterExitMethodVisitor extends MethodVisitor {
 
     private int currentLine = 1;
 
-    public MonitorEnterExitMethodVisitor(MethodVisitor mv, String className, String classNameJavaStyle, String sourceFile, final int access, final String name,
-                                         final String desc) {
-        super(Opcodes.ASM5, mv);
+    MonitorEnterExitMethodVisitor(MethodVisitor mv, String className, String classNameJavaStyle, String sourceFile, final int access, final String name,
+                                  final String desc) {
+        super(Opcodes.ASM6, mv);
         this.className = className;
         this.classNameJavaStyle = classNameJavaStyle;
         this.sourceFile = sourceFile;
@@ -76,7 +76,8 @@ public class MonitorEnterExitMethodVisitor extends MethodVisitor {
 
     private void createAndVisitNewTracerLocationInteger() {
         int tracerLocation = DeadlockTracerClassBinding.newLocation(classNameJavaStyle, methodName, sourceFile, currentLine);
-        visitLdcInsn(Integer.valueOf(tracerLocation));
+        Integer location = tracerLocation;
+        visitLdcInsn(location);
     }
 
     private void monitorExit() {

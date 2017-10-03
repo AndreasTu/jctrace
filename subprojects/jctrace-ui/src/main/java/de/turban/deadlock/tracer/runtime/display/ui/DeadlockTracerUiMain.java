@@ -66,7 +66,7 @@ public class DeadlockTracerUiMain extends Application {
         try {
             return res.get();
         } catch (InterruptedException | ExecutionException e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
     }
 

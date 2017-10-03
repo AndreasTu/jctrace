@@ -1,17 +1,17 @@
 package de.turban.deadlock.tracer.runtime.datacollection;
 
+import de.turban.deadlock.tracer.runtime.ICacheEntry;
+import gnu.trove.map.hash.THashMap;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Function;
 
-import de.turban.deadlock.tracer.runtime.ILockCacheEntry;
-import gnu.trove.map.hash.THashMap;
+public class CachingStrategyTHashMap<C extends ICacheEntry, T extends IThreadEntry> implements ICachingStrategy<C, T> {
 
-public class LockCachingStrategyTHashMap implements ILockCachingStrategy {
-
-    private final THashMap<Object, ILockCacheEntry> cache = new THashMap<Object, ILockCacheEntry>() {
+    private final THashMap<Object, C> cache = new THashMap<Object, C>() {
 
         @Override
         protected boolean equals(Object notnull, Object two) {
@@ -45,44 +45,44 @@ public class LockCachingStrategyTHashMap implements ILockCachingStrategy {
         }
 
     };
-    private final Function<ILockThreadEntry, ILockCacheEntry> factory;
+    private final Function<T, C> factory;
 
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
     private final Lock writeLock = lock.writeLock();
     private final Lock readLock = lock.readLock();
 
-    LockCachingStrategyTHashMap(Function<ILockThreadEntry, ILockCacheEntry> factory) {
+    CachingStrategyTHashMap(Function<T, C> factory) {
         this.factory = factory;
 
     }
 
     @Override
-    public ILockCacheEntry getLockCacheEntryOrCreate(ILockThreadEntry lockThreadEntry) {
-        ILockCacheEntry lockEntry = getLockCacheEntryUnsafe(lockThreadEntry);
+    public C getCacheEntryOrCreate(T threadEntry) {
+        C lockEntry = getCacheEntryUnsafe(threadEntry);
         if (lockEntry == null) {
-            lockEntry = createNewEntry(lockThreadEntry);
+            lockEntry = createNewEntry(threadEntry);
         }
         return lockEntry;
     }
 
     @Override
-    public ILockCacheEntry getLockCacheEntryUnsafe(ILockThreadEntry lockThreadEntry) {
+    public C getCacheEntryUnsafe(T threadEntry) {
         readLock.lock();
         try {
-            ILockCacheEntry res = cache.get(lockThreadEntry.getLock());
+            C res = cache.get(threadEntry.getObject());
             return res;
         } finally {
             readLock.unlock();
         }
     }
 
-    private ILockCacheEntry createNewEntry(ILockThreadEntry lockThreadEntry) {
+    private C createNewEntry(T threadEntry) {
         writeLock.lock();
         try {
 
-            ILockCacheEntry newLockEntry = factory.apply(lockThreadEntry);
-            LockWeakRef lockWeakRef = lockThreadEntry.getLockWeakReference();
-            ILockCacheEntry oldlockEntry = cache.put(lockWeakRef, newLockEntry);
+            C newLockEntry = factory.apply(threadEntry);
+            LockWeakRef lockWeakRef = threadEntry.getLockWeakReference();
+            C oldlockEntry = cache.put(lockWeakRef, newLockEntry);
             if (oldlockEntry != null) {
                 throw new IllegalStateException();
             }
@@ -93,7 +93,7 @@ public class LockCachingStrategyTHashMap implements ILockCachingStrategy {
     }
 
     @Override
-    public List<ILockCacheEntry> getLockEntries() {
+    public List<C> getEntries() {
         readLock.lock();
         try {
             return new ArrayList<>(cache.values());
@@ -103,7 +103,7 @@ public class LockCachingStrategyTHashMap implements ILockCachingStrategy {
     }
 
     @Override
-    public List<ILockCacheEntry> getLockEntriesExpungeStallEntries() {
+    public List<C> getEntriesExpungeStallEntries() {
         throw new UnsupportedOperationException();
     }
 

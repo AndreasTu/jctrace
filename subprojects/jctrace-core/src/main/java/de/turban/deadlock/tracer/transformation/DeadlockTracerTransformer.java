@@ -28,7 +28,7 @@ public class DeadlockTracerTransformer implements ClassFileTransformer {
 
     private static boolean TRACE_CLASS_TRANSFORMATION = false;
 
-    private static boolean CHECK_CLASS_VISITOR = false;
+    private static final boolean CHECK_CLASS_VISITOR = false;
 
     private static final String TRACE_CLASS_FOLDER_NAME = "DeadlockTracerTransformer_Classes";
 
@@ -36,7 +36,7 @@ public class DeadlockTracerTransformer implements ClassFileTransformer {
 
 
     static {
-        if (TRACE_CLASS_TRANSFORMATION == false) {
+        if (!TRACE_CLASS_TRANSFORMATION) {
             TRACE_CLASS_TRANSFORMATION = logger.isTraceEnabled();
         }
     }
@@ -80,6 +80,12 @@ public class DeadlockTracerTransformer implements ClassFileTransformer {
             return classfileBuffer;
         }
         if (className.startsWith("sun/misc")) {
+            return classfileBuffer;
+        }
+        if (className.startsWith("sun/usagetracker")) {
+            return classfileBuffer;
+        }
+        if (className.startsWith("jdk/internal")) {
             return classfileBuffer;
         }
 
@@ -175,7 +181,6 @@ public class DeadlockTracerTransformer implements ClassFileTransformer {
 
             String command = "cmd.exe /c javap -v -p " + classFileTempPath.toAbsolutePath() + " > " + classdeasmTempPath.toAbsolutePath();
             Runtime.getRuntime().exec(command);
-            return;
         } catch (IOException ex) {
             logger.error("Could not create deasm file for class " + className + " tried to call javap (windows style).", ex);
         }

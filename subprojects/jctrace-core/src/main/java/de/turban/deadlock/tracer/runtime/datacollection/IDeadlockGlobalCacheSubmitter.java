@@ -6,6 +6,10 @@ public interface IDeadlockGlobalCacheSubmitter {
 
     void newLockMonitorEnter(ILockThreadEntry lockEntry, ILockThreadEntry[] heldLocks);
 
+    void newFieldGet(IFieldThreadEntry fieldThreadEntry, ILockThreadEntry[] heldLocks);
+
+    void newFieldSet(IFieldThreadEntry fieldThreadEntry, ILockThreadEntry[] heldLocks);
+
     void newLockCreated(ILockThreadEntry lockEntry, ILockThreadEntry[] heldLocks);
 
 }

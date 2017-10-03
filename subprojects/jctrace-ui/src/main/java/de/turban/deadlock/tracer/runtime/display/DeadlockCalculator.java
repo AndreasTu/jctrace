@@ -2,9 +2,7 @@ package de.turban.deadlock.tracer.runtime.display;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import de.turban.deadlock.tracer.runtime.IDeadlockDataResolver;
-import de.turban.deadlock.tracer.runtime.ILockCache;
-import de.turban.deadlock.tracer.runtime.ILockCacheEntry;
+import de.turban.deadlock.tracer.runtime.*;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
 import java.util.*;
@@ -53,6 +51,15 @@ public class DeadlockCalculator {
 
     public List<ILockCacheEntry> getAllLocksSorted() {
         return resolver.getLockCache().getLockEntries();
+    }
+
+    public List<IFieldCacheEntry> getAllFieldsSorted() {
+        return resolver.getFieldCache().getFieldEntries();
+    }
+
+
+    public List<IFieldDescriptor> getAllFieldDescriptorsSorted() {
+        return resolver.getFieldDescriptorCache().getFieldDescriptors();
     }
 
     private void calculatePossibleDeadLocks(List<ILockCacheEntry> locks, Set<ILockCacheEntry> possibleDeadLocks) {

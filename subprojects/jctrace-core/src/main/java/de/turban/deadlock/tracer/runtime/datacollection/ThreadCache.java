@@ -5,7 +5,7 @@ import java.util.HashMap;
 import javax.annotation.concurrent.GuardedBy;
 import javax.annotation.concurrent.ThreadSafe;
 
-import de.turban.deadlock.tracer.runtime.ILockerThreadCache;
+import de.turban.deadlock.tracer.runtime.IThreadCache;
 import de.turban.deadlock.tracer.runtime.serdata.ISerializableData;
 import de.turban.deadlock.tracer.runtime.serdata.ISerializationSnapshotCreator;
 import de.turban.deadlock.tracer.runtime.serdata.LockerThreadCacheSerSnapshot;
@@ -13,9 +13,7 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
 @ThreadSafe
-public final class LockerThreadCache implements ILockerThreadCache, ISerializationSnapshotCreator {
-
-    public static final int INVALID_THREAD_ID = 0;
+public final class ThreadCache implements IThreadCache, ISerializationSnapshotCreator {
 
     @GuardedBy("threadMap")
     private int nextThreadId = INVALID_THREAD_ID;
@@ -26,7 +24,7 @@ public final class LockerThreadCache implements ILockerThreadCache, ISerializati
     @GuardedBy("threadMap")
     private int lastSerializedId = INVALID_THREAD_ID;
 
-    LockerThreadCache() {
+    ThreadCache() {
 
     }
 

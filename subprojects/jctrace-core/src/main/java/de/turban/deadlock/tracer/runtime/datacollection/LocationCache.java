@@ -1,6 +1,6 @@
 package de.turban.deadlock.tracer.runtime.datacollection;
 
-import de.turban.deadlock.tracer.runtime.ILockerLocationCache;
+import de.turban.deadlock.tracer.runtime.ILocationCache;
 import de.turban.deadlock.tracer.runtime.serdata.ISerializableData;
 import de.turban.deadlock.tracer.runtime.serdata.ISerializationSnapshotCreator;
 import de.turban.deadlock.tracer.runtime.serdata.LockerLocationCacheSerSnapshot;
@@ -13,13 +13,14 @@ import javax.annotation.concurrent.GuardedBy;
 import javax.annotation.concurrent.ThreadSafe;
 import java.util.*;
 
-@ThreadSafe
-public final class LockerLocationCache implements ILockerLocationCache, ISerializationSnapshotCreator {
+import static de.turban.deadlock.tracer.runtime.JctraceUtil.ensureArgument;
+import static de.turban.deadlock.tracer.runtime.JctraceUtil.ensureIsNull;
 
-    public static final int INVALID_ID = 0;
+@ThreadSafe
+public final class LocationCache implements ILocationCache, ISerializationSnapshotCreator {
 
     @GuardedBy("locationMap")
-    private int nextLocationId = INVALID_ID;
+    private int nextLocationId = INVALID_LOCATION_ID;
 
     @GuardedBy("locationMap")
     private final TIntObjectMap<StackTraceElement> locationMap = new TIntObjectHashMap<>();
@@ -34,9 +35,9 @@ public final class LockerLocationCache implements ILockerLocationCache, ISeriali
     private final HashSet<String> enabledStacktracingbyClass = new HashSet<>();
 
     @GuardedBy("locationMap")
-    private int lastSerializedId = INVALID_ID;
+    private int lastSerializedId = INVALID_LOCATION_ID;
 
-    LockerLocationCache() {
+    LocationCache() {
 
         enabledStacktracing.add(new StackTraceElement("de.turban.deadlock.tests.tracer.TestSync", "testReadWrite", "TestSync.java", 59));
 
@@ -50,9 +51,11 @@ public final class LockerLocationCache implements ILockerLocationCache, ISeriali
         }
         List<String> blackList = new ArrayList<>();
         for (String pkg : list.trim().split(";")) {
-            String pkgTrimmed = pkg.trim();
-            if (pkgTrimmed != null && !pkgTrimmed.isEmpty()) {
-                blackList.add(pkgTrimmed);
+            if(pkg != null) {
+                String pkgTrimmed = pkg.trim();
+                if (!pkgTrimmed.isEmpty()) {
+                    blackList.add(pkgTrimmed);
+                }
             }
         }
         return blackList;
@@ -72,15 +75,14 @@ public final class LockerLocationCache implements ILockerLocationCache, ISeriali
 
     public int getIdByLocation(StackTraceElement element) {
         synchronized (locationMap) {
-            int id = locationToIdMap.get(element);
-            return id;
+            return locationToIdMap.get(element);
         }
     }
 
-    public int getOrCreateIdByLocation(StackTraceElement element) {
+     int getOrCreateIdByLocation(StackTraceElement element) {
         synchronized (locationMap) {
             int id = locationToIdMap.get(element);
-            if (id == INVALID_ID) {
+            if (id == INVALID_LOCATION_ID) {
                 id = newLocation(element);
             }
             return id;
@@ -90,17 +92,21 @@ public final class LockerLocationCache implements ILockerLocationCache, ISeriali
     public int newLocation(StackTraceElement stackTraceElement) {
         Objects.requireNonNull(stackTraceElement);
         synchronized (locationMap) {
+            int id = locationToIdMap.get(stackTraceElement);
+            if( id != INVALID_LOCATION_ID){
+                return id;
+            }
             nextLocationId++;
-            int id = nextLocationId;
+            id = nextLocationId;
             ensureValidId(id);
-            Objects.isNull(locationMap.put(id, stackTraceElement));
-            Objects.isNull(locationToIdMap.put(stackTraceElement, id));
+            ensureIsNull(locationMap.put(id, stackTraceElement));
+            ensureArgument(locationToIdMap.put(stackTraceElement, id) == INVALID_LOCATION_ID);
             return id;
         }
     }
 
     private void ensureValidId(int id) {
-        if (id == INVALID_ID) {
+        if (id == INVALID_LOCATION_ID) {
             throw new IllegalArgumentException();
         }
     }
@@ -121,7 +127,7 @@ public final class LockerLocationCache implements ILockerLocationCache, ISeriali
                 locationToIdMap.remove(old);
             }
             locationMap.put(tracerLocationId, newElement);
-            Objects.isNull(locationToIdMap.put(newElement, tracerLocationId));
+            ensureArgument(locationToIdMap.put(newElement, tracerLocationId) == INVALID_LOCATION_ID);
 
         }
     }
@@ -148,7 +154,7 @@ public final class LockerLocationCache implements ILockerLocationCache, ISeriali
         return new LockerLocationCacheSerSnapshot(revision, serMap);
     }
 
-    public boolean isStacktracingEnabledForLocation(int locationId) {
+     boolean isStacktracingEnabledForLocation(int locationId) {
         StackTraceElement loc = getLocationById(locationId);
         synchronized (enabledStacktracing) {
             if (enabledStacktracing.contains(loc)) {
