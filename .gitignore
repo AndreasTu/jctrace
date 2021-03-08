@@ -29,6 +29,7 @@ build
 *.ipr
 *.iws
 *.iml
+.idea
 
 # Database and report files
 /subprojects/jctrace-core/Deadlock.db
