@@ -15,22 +15,14 @@ dependencies {
     implementation deps.disruptor
 
     implementation deps.gnuTrove
-    compileOnly deps.jsr305
-
-
-    testImplementation 'junit:junit:4.12'
-    testImplementation 'org.hamcrest:hamcrest-all:1.3'
-    testImplementation deps.guava
 }
 
 
 test {
     jvmArgs '-Xmx1124m'
-
     //jvmArgs '-XX:+UnlockCommercialFeatures'
     //jvmArgs '-XX:+FlightRecorder'
     //jvmArgs '-XX:StartFlightRecording=dumponexit=true,settings=profile.jfc,filename=d:/test.jfr'
-
 }
 
 

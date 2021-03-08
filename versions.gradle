@@ -3,6 +3,7 @@ rootProject.version = "1.0.0-SNAPSHOT"
 
 def asmVersion = '9.1'
 def slf4jVersion = '1.7.30'
+def junit5Version = '5.7.1'
 
 deps.asm =[
         [group:'org.ow2.asm', name:'asm', version: asmVersion],
@@ -10,6 +11,13 @@ deps.asm =[
         [group:'org.ow2.asm', name:'asm-analysis', version: asmVersion],
         [group:'org.ow2.asm', name:'asm-tree', version: asmVersion],
         [group:'org.ow2.asm', name:'asm-commons', version: asmVersion],
+    ]
+
+deps.assertJ = [group: 'org.assertj', name: 'assertj-core', version: '3.19.0']
+
+deps.junit5Api = [group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: junit5Version]
+deps.junit5Impl = [
+        [group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junit5Version]
     ]
 
 

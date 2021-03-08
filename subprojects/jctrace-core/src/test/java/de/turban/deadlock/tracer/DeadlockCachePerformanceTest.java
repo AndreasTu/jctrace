@@ -7,8 +7,8 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import de.turban.deadlock.tracer.runtime.datacollection.DeadlockCollectBindingResolver;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -24,7 +24,7 @@ public class DeadlockCachePerformanceTest {
 
     private static int locNr;
 
-    @BeforeClass
+    @BeforeAll
     public static void setupClass() throws InterruptedException, ExecutionException {
         locNr = DeadlockTracerClassBinding.newLocation(DeadlockCachePerformanceTest.class.getName(), "lock", "", 1);
         numThreads = Runtime.getRuntime().availableProcessors();

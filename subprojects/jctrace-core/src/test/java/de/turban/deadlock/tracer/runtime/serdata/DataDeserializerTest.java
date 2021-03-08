@@ -1,12 +1,13 @@
 package de.turban.deadlock.tracer.runtime.serdata;
 
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 
 import java.nio.file.Paths;
 import java.util.List;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 public class DataDeserializerTest {
 
@@ -15,6 +16,6 @@ public class DataDeserializerTest {
 
         DataDeserializer deSer = new DataDeserializer();
         List<ISerializableData> list = deSer.readData(Paths.get("src/test/resources/Deadlock.db"));
-        assertThat(list.size(), equalTo(375));
+        assertThat(list.size()).isEqualTo(375);
     }
 }

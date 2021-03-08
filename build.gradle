@@ -18,5 +18,21 @@ apply from: "versions.gradle"
 subprojects{
     apply plugin: 'java'
     version = rootProject.version
+
+
+    //Common Dependencies Configuration
+    dependencies {
+        compileOnly deps.jsr305
+
+        testImplementation deps.junit5Api
+        testRuntimeOnly deps.junit5Impl
+        testImplementation deps.assertJ
+        testImplementation deps.guava
+    }
+
+    //Common test configuration
+    tasks.withType(Test).configureEach{
+        useJUnitPlatform()
+    }
 }
 
