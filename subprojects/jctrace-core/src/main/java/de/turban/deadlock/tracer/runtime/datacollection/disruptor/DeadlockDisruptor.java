@@ -78,7 +78,7 @@ public final class DeadlockDisruptor implements IDeadlockGlobalCacheSubmitter {
         Disruptor<LockEvent> disruptor = new Disruptor<>(factory, bufferSize, executor, ProducerType.MULTI,
             new PhasedBackoffWaitStrategy(400, 10000, TimeUnit.MICROSECONDS, new BlockingWaitStrategy()));
 
-        disruptor.handleExceptionsWith(new ExceptionHandler<LockEvent>() {
+        disruptor.setDefaultExceptionHandler(new ExceptionHandler<LockEvent>() {
 
             @Override
             public void handleEventException(Throwable ex, long sequence, LockEvent event) {
