@@ -1,3 +1,8 @@
+plugins{
+    id 'application'
+    id "org.openjfx.javafxplugin"
+}
+
 def mainClassName = 'de.turban.deadlock.tracer.runtime.display.ui.DeadlockTracerUiMain'
 
 // In this section you declare the dependencies for your production and test code
@@ -8,16 +13,18 @@ dependencies {
 }
 
 
-tasks.register("runUI", JavaExec) {
-    group "Run"
-    description "Starts the UI to display the database specified with -PdbFile=Deadlock.db"
-    classpath = sourceSets.main.runtimeClasspath
+javafx {
+    modules = [ 'javafx.controls', 'javafx.fxml' ]
+}
 
-    main = mainClassName
+application{
+    mainClass = mainClassName
+}
+
+tasks.named("run").configure{
     if (hasDbFile()) {
         it.args rootProject.file(rootProject.ext.dbFile)
     }
-
     it.doFirst {
         assertDbFileSpecified()
     }

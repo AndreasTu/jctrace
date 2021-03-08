@@ -19,7 +19,7 @@ Jctrace will instrument and measure the following items:
 * `java.util.concurrent.locks.ReentrantReadWriteLock`
 * `java.util.concurrent.locks.StampedLock`
 
-The jctrace is currently only tested with Java 8.
+The jctrace is currently only tested with Java 8 and Java 11.
 
 Jctrace could also create stacktraces of found potential deadlocks to ease the fix of the underlying problem.
 
@@ -47,7 +47,7 @@ You could blacklist whole packages including all sub packages with `-Dde.turban.
 Packages are separated with an `;`.
 
 #### Stacktrace
-You could enable the collcetion of stacktraces for certain classes with `-Dde.turban.DeadLockTracer.stacktracingClasses`
+You could enable the collection of stacktraces for certain classes with `-Dde.turban.DeadLockTracer.stacktracingClasses`
 
 Class names are separated with an `;`.
  
@@ -70,7 +70,7 @@ Full Path sample:
 
 You could open the UI with:
 ```
-gradlew runUI -PdbFile=Deadlock.db
+gradlew run -PdbFile=Deadlock.db
 ```
 
 Note: In the current version the UI will the show anything, if there is no potential deadlock.
