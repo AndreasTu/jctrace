@@ -2,24 +2,20 @@ plugins {
     id "com.github.johnrengelman.shadow"
 }
 
-
-// In this section you declare the dependencies for your production and test code
 dependencies {
     // The production code uses the SLF4J logging API at compile time
     implementation deps.slf4j
     implementation deps.slf4jJdk
 
     implementation deps.asm
+    implementation deps.gnuTrove
 
     //Currently not used in production
     implementation deps.disruptor
-
-    implementation deps.gnuTrove
 }
 
 
 test {
-    jvmArgs '-Xmx1124m'
     //jvmArgs '-XX:+UnlockCommercialFeatures'
     //jvmArgs '-XX:+FlightRecorder'
     //jvmArgs '-XX:StartFlightRecording=dumponexit=true,settings=profile.jfc,filename=d:/test.jfr'

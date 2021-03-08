@@ -41,15 +41,8 @@ tasks.register("runReportXml", JavaExec) {
     }
 }
 
-
-test {
-    jvmArgs '-Xmx1124m'
-}
-
-
 jar {
     manifest {
-
         attributes(
             'Implementation-Title': project.name,
             'Implementation-Version': project.version,
