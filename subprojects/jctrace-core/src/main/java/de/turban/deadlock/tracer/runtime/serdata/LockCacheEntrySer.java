@@ -13,7 +13,7 @@ import java.util.Objects;
 
 @Immutable
 public final class LockCacheEntrySer implements ILockCacheEntry, ISerializableData, IHasStacksamples {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -1720986290475958777L;
 
     private final String lockClass;
 
