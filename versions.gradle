@@ -9,6 +9,7 @@ deps.asm =[
         [group:'org.ow2.asm', name:'asm-util', version: asmVersion],
         [group:'org.ow2.asm', name:'asm-analysis', version: asmVersion],
         [group:'org.ow2.asm', name:'asm-tree', version: asmVersion],
+        [group:'org.ow2.asm', name:'asm-commons', version: asmVersion],
     ]
 
 
@@ -23,7 +24,6 @@ deps.disruptor = [group: 'com.lmax', name: 'disruptor', version: '3.4.2']
 
 deps.slf4j =[
         [group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion]
-    ] 
-    
+    ]
+
 deps.slf4jJdk =[group: 'org.slf4j', name: 'slf4j-jdk14', version: slf4jVersion]
-    
