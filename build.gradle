@@ -1,13 +1,8 @@
-
+plugins{
+    id "com.github.johnrengelman.shadow" version "6.1.0" apply false
+}
 
 allprojects{
-    
-     buildscript {
-        repositories { jcenter() }
-    }
-   
-    apply plugin: 'idea'
-
     repositories {
         jcenter()
         maven {
@@ -17,8 +12,11 @@ allprojects{
     }
 }
 
-subprojects{
+apply from: "gradle/depsExt.gradle"
+apply from: "versions.gradle"
 
+subprojects{
     apply plugin: 'java'
+    version = rootProject.version
 }
 

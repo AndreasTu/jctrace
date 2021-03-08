@@ -1,14 +1,10 @@
 
-version = '1.0.0-SNAPSHOT'
-
 def mainClassName = 'de.turban.deadlock.tracer.runtime.display.ui.DeadlockTracerUiMain'
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-    compile project(':subprojects:jctrace-core')
-    
-    
-    compile 'com.google.guava:guava:23.0'
+    implementation project(':subprojects:jctrace-core')
+    implementation deps.guava
 }
 
 

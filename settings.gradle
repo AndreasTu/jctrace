@@ -1,3 +1,12 @@
+pluginManagement {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+        jcenter()
+    }
+}
+
 rootProject.name = 'jctrace'
 
 

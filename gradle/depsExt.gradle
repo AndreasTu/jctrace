@@ -1,0 +1,7 @@
+class DependenciesExt extends Expando {
+}
+
+def dependenciesExt = new DependenciesExt()
+allprojects {
+    extensions.add("deps", dependenciesExt)
+}
