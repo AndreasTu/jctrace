@@ -1,16 +1,15 @@
 package de.turban.deadlock.tracer.runtime.datacollection;
 
-import java.util.HashMap;
-
-import javax.annotation.concurrent.GuardedBy;
-import javax.annotation.concurrent.ThreadSafe;
-
 import de.turban.deadlock.tracer.runtime.IThreadCache;
 import de.turban.deadlock.tracer.runtime.serdata.ISerializableData;
 import de.turban.deadlock.tracer.runtime.serdata.ISerializationSnapshotCreator;
 import de.turban.deadlock.tracer.runtime.serdata.LockerThreadCacheSerSnapshot;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+
+import javax.annotation.concurrent.GuardedBy;
+import javax.annotation.concurrent.ThreadSafe;
+import java.util.HashMap;
 
 @ThreadSafe
 public final class ThreadCache implements IThreadCache, ISerializationSnapshotCreator {

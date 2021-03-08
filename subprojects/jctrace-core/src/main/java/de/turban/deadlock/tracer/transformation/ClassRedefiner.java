@@ -1,6 +1,7 @@
 package de.turban.deadlock.tracer.transformation;
 
-import static de.turban.deadlock.tracer.transformation.TransformationConstants.CLASS_FILE_SUFFIX;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -9,15 +10,6 @@ import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.jar.JarFile;
-import java.util.zip.ZipEntry;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ClassRedefiner {
     private static Logger logger = LoggerFactory.getLogger(ClassRedefiner.class);
@@ -61,13 +53,13 @@ public class ClassRedefiner {
     private static byte[] getBytes(Class<?> reentLock) throws IOException {
 
         InputStream is = ClassLoader.getSystemClassLoader().getResourceAsStream(REENTRANT_LOCK_CLASS + TransformationConstants.CLASS_FILE_SUFFIX);
-        if( is == null){
+        if (is == null) {
             throw new IllegalStateException("Could not find ReentrantLock Class data in running Java VM."
-                    + ". The data is needed for ReentrantLock instrumentation.");
+                + ". The data is needed for ReentrantLock instrumentation.");
         }
         try {
             return getBytesFromStream(is);
-        }finally {
+        } finally {
             is.close();
         }
     }

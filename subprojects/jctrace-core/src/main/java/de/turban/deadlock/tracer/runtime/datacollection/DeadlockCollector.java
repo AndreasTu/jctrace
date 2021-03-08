@@ -1,12 +1,12 @@
 package de.turban.deadlock.tracer.runtime.datacollection;
 
+import de.turban.deadlock.tracer.DeadlockTracerClassBinding;
+import de.turban.deadlock.tracer.runtime.serdata.DataSerializer;
+
 import java.nio.file.Paths;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import de.turban.deadlock.tracer.DeadlockTracerClassBinding;
-import de.turban.deadlock.tracer.runtime.serdata.DataSerializer;
 
 public class DeadlockCollector {
 
@@ -37,9 +37,9 @@ public class DeadlockCollector {
     }
 
 
-    public static class CollectorThread extends Thread{
+    public static class CollectorThread extends Thread {
 
-        CollectorThread(Runnable r){
+        CollectorThread(Runnable r) {
             super(r);
         }
     }

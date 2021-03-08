@@ -1,12 +1,12 @@
 package de.turban.deadlock.tracer.runtime.serdata;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
+import org.junit.Test;
 
 import java.nio.file.Paths;
 import java.util.List;
 
-import org.junit.Test;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertThat;
 
 public class DataDeserializerTest {
 

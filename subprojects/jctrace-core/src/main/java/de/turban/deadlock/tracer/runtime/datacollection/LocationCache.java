@@ -11,7 +11,12 @@ import gnu.trove.map.hash.TObjectIntHashMap;
 
 import javax.annotation.concurrent.GuardedBy;
 import javax.annotation.concurrent.ThreadSafe;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
 
 import static de.turban.deadlock.tracer.runtime.JctraceUtil.ensureArgument;
 import static de.turban.deadlock.tracer.runtime.JctraceUtil.ensureIsNull;
@@ -51,7 +56,7 @@ public final class LocationCache implements ILocationCache, ISerializationSnapsh
         }
         List<String> blackList = new ArrayList<>();
         for (String pkg : list.trim().split(";")) {
-            if(pkg != null) {
+            if (pkg != null) {
                 String pkgTrimmed = pkg.trim();
                 if (!pkgTrimmed.isEmpty()) {
                     blackList.add(pkgTrimmed);
@@ -79,7 +84,7 @@ public final class LocationCache implements ILocationCache, ISerializationSnapsh
         }
     }
 
-     int getOrCreateIdByLocation(StackTraceElement element) {
+    int getOrCreateIdByLocation(StackTraceElement element) {
         synchronized (locationMap) {
             int id = locationToIdMap.get(element);
             if (id == INVALID_LOCATION_ID) {
@@ -93,7 +98,7 @@ public final class LocationCache implements ILocationCache, ISerializationSnapsh
         Objects.requireNonNull(stackTraceElement);
         synchronized (locationMap) {
             int id = locationToIdMap.get(stackTraceElement);
-            if( id != INVALID_LOCATION_ID){
+            if (id != INVALID_LOCATION_ID) {
                 return id;
             }
             nextLocationId++;
@@ -154,7 +159,7 @@ public final class LocationCache implements ILocationCache, ISerializationSnapsh
         return new LockerLocationCacheSerSnapshot(revision, serMap);
     }
 
-     boolean isStacktracingEnabledForLocation(int locationId) {
+    boolean isStacktracingEnabledForLocation(int locationId) {
         StackTraceElement loc = getLocationById(locationId);
         synchronized (enabledStacktracing) {
             if (enabledStacktracing.contains(loc)) {

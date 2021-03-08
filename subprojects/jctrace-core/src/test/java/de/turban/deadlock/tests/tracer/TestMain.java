@@ -47,7 +47,7 @@ public class TestMain {
 
         new TestMain().longField = 1;
 
-        if (new TestMain().longField ==1) {
+        if (new TestMain().longField == 1) {
 
         }
 

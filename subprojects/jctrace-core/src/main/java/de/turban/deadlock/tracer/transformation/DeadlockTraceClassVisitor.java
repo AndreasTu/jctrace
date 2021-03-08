@@ -14,13 +14,12 @@ class DeadlockTraceClassVisitor extends ClassVisitor {
     private String classNameJavaStyle;
 
     DeadlockTraceClassVisitor(ClassVisitor cv) {
-        super(Opcodes.ASM6, cv);
+        super(JctraceAsmUtil.ASM_VERSION, cv);
 
     }
 
     @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-        this.version = version;
         if (version < Opcodes.V1_5) {
             this.version = Opcodes.V1_5;
         } else {
@@ -46,7 +45,7 @@ class DeadlockTraceClassVisitor extends ClassVisitor {
     @Override
     public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
         FieldVisitor fv = super.visitField(access, name, desc, signature, value);
-        fv = new FieldCollectVisitor(fv,className, classNameJavaStyle, sourceFile, access, name, desc);
+        fv = new FieldCollectVisitor(fv, className, classNameJavaStyle, sourceFile, access, name, desc);
 
         return fv;
     }
@@ -66,7 +65,4 @@ class DeadlockTraceClassVisitor extends ClassVisitor {
         }
         return mv;
     }
-
-
-
 }

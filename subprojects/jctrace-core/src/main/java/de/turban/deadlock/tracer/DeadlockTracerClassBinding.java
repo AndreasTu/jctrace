@@ -18,7 +18,6 @@ public class DeadlockTracerClassBinding {
     public static final String TRACER_PKG = "de.turban.deadlock.tracer";
     public static final String TRACER_STATIC_CLASS = "de/turban/deadlock/tracer/DeadlockTracerClassBinding";
 
-
     private static boolean LOGGER_TRACE_STATIC_ENABLED = false;
 
     private static Logger logger;
@@ -216,10 +215,10 @@ public class DeadlockTracerClassBinding {
 
 
     /*
-    * -------------------
-    * FieldAccess methods
-    * --------------------
-    */
+     * -------------------
+     * FieldAccess methods
+     * --------------------
+     */
     public static int newField(String className, String fieldName, String desc, int asmAccessFlags, boolean isFromField) {
         return getBindingResolver().getFieldDescriptorCache().newFieldDescriptor(className, fieldName, desc, asmAccessFlags, isFromField);
     }
@@ -261,6 +260,4 @@ public class DeadlockTracerClassBinding {
             info.stopTrace();
         }
     }
-
-
 }

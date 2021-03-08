@@ -12,9 +12,7 @@ import gnu.trove.map.hash.TObjectIntHashMap;
 
 import javax.annotation.concurrent.GuardedBy;
 import javax.annotation.concurrent.ThreadSafe;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Objects;
 
 import static de.turban.deadlock.tracer.runtime.JctraceUtil.ensureArgument;
@@ -61,8 +59,8 @@ public final class FieldDescriptorCache implements IFieldDescriptorCache, ISeria
             FieldDescriptor fieldDesc = new FieldDescriptor(INVALID_FIELD_DESCRIPTOR_ID, fieldClass, fieldName, desc);
             int id = descriptorToIdMap.get(fieldDesc);
             if (id != INVALID_FIELD_DESCRIPTOR_ID) {
-                if(fromField){
-                    ((FieldDescriptor)descriptorMap.get(id)).setAccessFlags(asmAccessFlags);
+                if (fromField) {
+                    ((FieldDescriptor) descriptorMap.get(id)).setAccessFlags(asmAccessFlags);
                 }
                 return id;
             }
@@ -70,7 +68,7 @@ public final class FieldDescriptorCache implements IFieldDescriptorCache, ISeria
             id = nextFieldDescriptorId;
             ensureValidId(id);
             fieldDesc = new FieldDescriptor(id, fieldClass, fieldName, desc);
-            if(fromField) {
+            if (fromField) {
                 fieldDesc.setAccessFlags(asmAccessFlags);
             }
             ensureIsNull(descriptorMap.put(id, fieldDesc));

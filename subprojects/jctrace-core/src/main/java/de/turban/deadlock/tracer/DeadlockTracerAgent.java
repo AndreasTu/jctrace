@@ -1,9 +1,9 @@
 package de.turban.deadlock.tracer;
 
-import java.lang.instrument.Instrumentation;
-
 import de.turban.deadlock.tracer.transformation.ClassRedefiner;
 import de.turban.deadlock.tracer.transformation.DeadlockTracerTransformer;
+
+import java.lang.instrument.Instrumentation;
 
 public class DeadlockTracerAgent {
 
@@ -12,5 +12,4 @@ public class DeadlockTracerAgent {
         ClassRedefiner.redefineClasses(instrumentation, transformer);
         instrumentation.addTransformer(transformer, false);
     }
-
 }

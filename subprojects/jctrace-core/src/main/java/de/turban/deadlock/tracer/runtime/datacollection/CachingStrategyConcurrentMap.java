@@ -1,5 +1,7 @@
 package de.turban.deadlock.tracer.runtime.datacollection;
 
+import de.turban.deadlock.tracer.runtime.ICacheEntry;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -8,10 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 
-import de.turban.deadlock.tracer.runtime.ICacheEntry;
-import de.turban.deadlock.tracer.runtime.ILockCacheEntry;
-
-public class CachingStrategyConcurrentMap<C extends ICacheEntry,T extends IThreadEntry> implements ICachingStrategy<C,T> {
+public class CachingStrategyConcurrentMap<C extends ICacheEntry, T extends IThreadEntry> implements ICachingStrategy<C, T> {
 
     private final ConcurrentMap<LockWeakRef, C> lockCache = new ConcurrentHashMap<>();
     private final Function<T, C> factory;
@@ -55,7 +54,7 @@ public class CachingStrategyConcurrentMap<C extends ICacheEntry,T extends IThrea
     public List<C> getEntriesExpungeStallEntries() {
 
         List<C> list = new ArrayList<>();
-        for (Iterator<Entry<LockWeakRef, C>> iterator = lockCache.entrySet().iterator(); iterator.hasNext();) {
+        for (Iterator<Entry<LockWeakRef, C>> iterator = lockCache.entrySet().iterator(); iterator.hasNext(); ) {
             Entry<LockWeakRef, C> entry = iterator.next();
             LockWeakRef wRef = entry.getKey();
             C value = entry.getValue();

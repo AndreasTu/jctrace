@@ -89,7 +89,7 @@ public class PerThreadData {
         @Override
         public String toString() {
             return "LockThreadEntry [lock=" + lock + ", lockerLocationId=" + lockerLocationId + ", lockerThreadId=" + lockerThreadId + ", lockCount="
-                    + lockCount + "]";
+                + lockCount + "]";
         }
 
     }

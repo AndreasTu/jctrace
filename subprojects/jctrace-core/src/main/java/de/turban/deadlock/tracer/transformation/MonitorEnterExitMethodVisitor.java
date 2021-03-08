@@ -26,7 +26,7 @@ class MonitorEnterExitMethodVisitor extends MethodVisitor {
 
     MonitorEnterExitMethodVisitor(MethodVisitor mv, String className, String classNameJavaStyle, String sourceFile, final int access, final String name,
                                   final String desc) {
-        super(Opcodes.ASM6, mv);
+        super(JctraceAsmUtil.ASM_VERSION, mv);
         this.className = className;
         this.classNameJavaStyle = classNameJavaStyle;
         this.sourceFile = sourceFile;

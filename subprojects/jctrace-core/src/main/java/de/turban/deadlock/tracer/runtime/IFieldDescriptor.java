@@ -3,7 +3,7 @@ package de.turban.deadlock.tracer.runtime;
 import javax.annotation.concurrent.ThreadSafe;
 
 @ThreadSafe
-public interface IFieldDescriptor extends  Comparable<IFieldDescriptor>{
+public interface IFieldDescriptor extends Comparable<IFieldDescriptor> {
 
     int INVALID_FIELD_DESCRIPTOR_ID = 0;
 

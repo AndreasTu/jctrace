@@ -1,5 +1,10 @@
 package de.turban.deadlock.tracer.runtime.serdata;
 
+import de.turban.deadlock.tracer.runtime.ICacheEntry;
+import de.turban.deadlock.tracer.runtime.IFieldCacheEntry;
+import de.turban.deadlock.tracer.runtime.ILockCacheEntry;
+import de.turban.deadlock.tracer.runtime.datacollection.IDeadlockCollectBindingResolver;
+
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -11,11 +16,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import de.turban.deadlock.tracer.runtime.ICacheEntry;
-import de.turban.deadlock.tracer.runtime.IFieldCacheEntry;
-import de.turban.deadlock.tracer.runtime.ILockCacheEntry;
-import de.turban.deadlock.tracer.runtime.datacollection.IDeadlockCollectBindingResolver;
 
 public class DataSerializer {
     private static AtomicInteger currentRevision = new AtomicInteger(0);
@@ -83,7 +83,7 @@ public class DataSerializer {
         }
     }
 
-    private void serCacheEntries(OutputStream os, int revision, List< ? extends ICacheEntry> entries) {
+    private void serCacheEntries(OutputStream os, int revision, List<? extends ICacheEntry> entries) {
         for (ICacheEntry e : entries) {
             ISerializationSnapshotCreator cacheEntry = (ISerializationSnapshotCreator) e;
             ISerializableData data = cacheEntry.createSerializationSnapshot(revision);

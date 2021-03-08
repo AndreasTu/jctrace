@@ -50,7 +50,7 @@ public class FieldDescriptor implements IFieldDescriptor, Serializable {
         return isStatic;
     }
 
-    void setAccessFlags(int asmAccessFlags){
+    void setAccessFlags(int asmAccessFlags) {
         isVolatile = (asmAccessFlags & Opcodes.ACC_VOLATILE) != 0;
         isStatic = (asmAccessFlags & Opcodes.ACC_STATIC) != 0;
     }

@@ -1,7 +1,6 @@
 package de.turban.deadlock.tracer.runtime.datacollection.disruptor;
 
 import com.lmax.disruptor.EventHandler;
-
 import de.turban.deadlock.tracer.runtime.datacollection.IDeadlockGlobalCacheSubmitter;
 import de.turban.deadlock.tracer.runtime.datacollection.ILockThreadEntry;
 

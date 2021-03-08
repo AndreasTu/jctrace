@@ -2,7 +2,7 @@ package de.turban.deadlock.tracer.runtime;
 
 import java.util.List;
 
-public interface IReportFieldDescriptorCache extends  IFieldDescriptorCache {
+public interface IReportFieldDescriptorCache extends IFieldDescriptorCache {
 
     /**
      * Returns a sorted immutable list of all {@link IFieldDescriptor} in the loaded database.

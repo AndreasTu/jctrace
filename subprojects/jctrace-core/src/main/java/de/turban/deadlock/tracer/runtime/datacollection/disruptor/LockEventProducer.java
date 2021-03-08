@@ -1,7 +1,6 @@
 package de.turban.deadlock.tracer.runtime.datacollection.disruptor;
 
 import com.lmax.disruptor.RingBuffer;
-
 import de.turban.deadlock.tracer.runtime.datacollection.ILockThreadEntry;
 
 class LockEventProducer {

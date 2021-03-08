@@ -37,9 +37,9 @@ public final class DeadlockGlobalCache implements IDeadlockGlobalCacheSubmitter,
     create(IDeadlockCollectBindingResolver resolver, ICachingStrategy.ICachingStrategyCreator<ICacheEntry, IThreadEntry> strategyCreator) {
 
         ICachingStrategy<ILockCacheEntry, ILockThreadEntry> lockCache = JctraceUtil.uncheckedCast(
-                strategyCreator.apply(e -> new LockCacheEntry((ILockThreadEntry) e)));
+            strategyCreator.apply(e -> new LockCacheEntry((ILockThreadEntry) e)));
         ICachingStrategy<IFieldCacheEntry, IFieldThreadEntry> fieldCache = JctraceUtil.uncheckedCast(
-                strategyCreator.apply(e -> new FieldCacheEntry((IFieldThreadEntry) e)));
+            strategyCreator.apply(e -> new FieldCacheEntry((IFieldThreadEntry) e)));
 
         return new DeadlockGlobalCache(resolver, lockCache, fieldCache);
     }

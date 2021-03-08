@@ -2,7 +2,7 @@ package de.turban.deadlock.tracer.runtime.datacollection;
 
 import de.turban.deadlock.tracer.runtime.IFieldDescriptor;
 
-public interface IFieldThreadEntry extends  IThreadEntry {
+public interface IFieldThreadEntry extends IThreadEntry {
 
     /**
      * @return returns the owner object of the field.

@@ -27,7 +27,7 @@ class FieldGetSetMethodVisitor extends MethodVisitor {
 
     FieldGetSetMethodVisitor(MethodVisitor mv, String className, String classNameJavaStyle, String sourceFile, final int access, final String name,
                              final String desc) {
-        super(Opcodes.ASM5, mv);
+        super(JctraceAsmUtil.ASM_VERSION, mv);
         this.className = className;
         this.classNameJavaStyle = classNameJavaStyle;
         this.sourceFile = sourceFile;
@@ -48,9 +48,9 @@ class FieldGetSetMethodVisitor extends MethodVisitor {
         } else if (opcode == Opcodes.GETFIELD) {
             getField(owner, name, desc);
         } else if (opcode == Opcodes.PUTSTATIC) {
-           // putField(owner, name, desc);
+            // putField(owner, name, desc);
         } else if (opcode == Opcodes.GETSTATIC) {
-           // getField(owner, name, desc);
+            // getField(owner, name, desc);
         }
         super.visitFieldInsn(opcode, owner, name, desc);
     }
@@ -62,7 +62,6 @@ class FieldGetSetMethodVisitor extends MethodVisitor {
     }
 
 
-
     private void getField(String owner, String name, String desc) {
         visitInsn(Opcodes.DUP);
         createAndVisitFieldDescriptor(owner, name, desc);
@@ -72,11 +71,11 @@ class FieldGetSetMethodVisitor extends MethodVisitor {
 
     private void putField(String owner, String name, String desc) {
         Type type = Type.getType(desc);
-        if( type == Type.LONG_TYPE || type == Type.DOUBLE_TYPE){
+        if (type == Type.LONG_TYPE || type == Type.DOUBLE_TYPE) {
             visitInsn(Opcodes.DUP2_X1);
             visitInsn(Opcodes.POP2);
             visitInsn(Opcodes.DUP_X2);
-        }else {
+        } else {
             visitInsn(Opcodes.DUP2);
             visitInsn(Opcodes.POP);
         }
@@ -94,8 +93,6 @@ class FieldGetSetMethodVisitor extends MethodVisitor {
         Integer location = DeadlockTracerClassBinding.newField(DeadlockTraceClassVisitor.classNameJavaStyle(owner), name, desc, 0, false);
         visitLdcInsn(location);
     }
-
-
 
     private void newGetFieldMethodCall() {
         visitMethodInsn(Opcodes.INVOKESTATIC, TRACER_STATIC_CLASS, "getField", OBJ_STR_STR_INT_VOID_DESC, false);

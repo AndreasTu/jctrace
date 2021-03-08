@@ -1,6 +1,6 @@
 package de.turban.deadlock.tracer.runtime.datacollection;
 
-import de.turban.deadlock.tracer.runtime.*;
+import de.turban.deadlock.tracer.runtime.ICacheEntry;
 
 import java.util.List;
 import java.util.function.Function;

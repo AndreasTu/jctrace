@@ -2,10 +2,18 @@ package de.turban.deadlock.tracer.runtime.display;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import de.turban.deadlock.tracer.runtime.*;
+import de.turban.deadlock.tracer.runtime.IDeadlockDataResolver;
+import de.turban.deadlock.tracer.runtime.IFieldCacheEntry;
+import de.turban.deadlock.tracer.runtime.IFieldDescriptor;
+import de.turban.deadlock.tracer.runtime.ILockCache;
+import de.turban.deadlock.tracer.runtime.ILockCacheEntry;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 
 public class DeadlockCalculator {

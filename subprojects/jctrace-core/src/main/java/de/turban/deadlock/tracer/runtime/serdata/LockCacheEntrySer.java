@@ -105,7 +105,7 @@ public final class LockCacheEntrySer implements ILockCacheEntry, ISerializableDa
     }
 
     @Override
-    public int compareTo(@Nonnull  ILockCacheEntry o) {
+    public int compareTo(@Nonnull ILockCacheEntry o) {
         int id1 = this.getId();
         int id2 = o.getId();
         return Integer.compare(id1, id2);

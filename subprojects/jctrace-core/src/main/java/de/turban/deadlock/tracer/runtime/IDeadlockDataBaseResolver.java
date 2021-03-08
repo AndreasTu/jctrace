@@ -1,7 +1,7 @@
 package de.turban.deadlock.tracer.runtime;
 
 /**
- * 
+ *
  */
 public interface IDeadlockDataBaseResolver {
 

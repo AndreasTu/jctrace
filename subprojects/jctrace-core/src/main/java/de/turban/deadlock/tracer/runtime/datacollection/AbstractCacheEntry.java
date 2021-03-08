@@ -9,7 +9,11 @@ import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 
 import javax.annotation.concurrent.GuardedBy;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 abstract class AbstractCacheEntry implements ICacheEntry, ISerializationSnapshotCreator {
 
@@ -29,12 +33,12 @@ abstract class AbstractCacheEntry implements ICacheEntry, ISerializationSnapshot
     private Set<StackSample> stackSamples = null;
 
 
-    protected AbstractCacheEntry(int id){
+    protected AbstractCacheEntry(int id) {
 
         if (id <= 0) {
-            throw new IllegalStateException(this.getClass().getSimpleName()+ " global id count overflow");
+            throw new IllegalStateException(this.getClass().getSimpleName() + " global id count overflow");
         }
-        this.id= id;
+        this.id = id;
         changedSinceLastSnapshot = true;
     }
 
@@ -65,6 +69,7 @@ abstract class AbstractCacheEntry implements ICacheEntry, ISerializationSnapshot
             lockerThreadIds.add(lockerThreadId);
         }
     }
+
     @GuardedBy("this")
     protected boolean addLocationId(int lockerLocationId) {
         if (lockerLocationId != LocationCache.INVALID_LOCATION_ID) {
@@ -75,7 +80,7 @@ abstract class AbstractCacheEntry implements ICacheEntry, ISerializationSnapshot
 
 
     @GuardedBy("this")
-    protected final void setChangedSinceLastSnapshot(){
+    protected final void setChangedSinceLastSnapshot() {
         changedSinceLastSnapshot = true;
     }
 

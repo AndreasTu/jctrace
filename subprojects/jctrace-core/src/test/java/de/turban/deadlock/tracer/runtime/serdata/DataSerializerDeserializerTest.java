@@ -1,17 +1,16 @@
 package de.turban.deadlock.tracer.runtime.serdata;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
+import de.turban.deadlock.tracer.runtime.IDeadlockDataResolver;
+import de.turban.deadlock.tracer.runtime.ILockCacheEntry;
+import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
-
-import de.turban.deadlock.tracer.runtime.IDeadlockDataResolver;
-import de.turban.deadlock.tracer.runtime.ILockCacheEntry;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertThat;
 
 public class DataSerializerDeserializerTest {
 

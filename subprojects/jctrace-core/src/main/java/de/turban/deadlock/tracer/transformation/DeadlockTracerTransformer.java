@@ -65,7 +65,7 @@ public class DeadlockTracerTransformer implements ClassFileTransformer {
 
     @Override
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer)
-            throws IllegalClassFormatException {
+        throws IllegalClassFormatException {
 
         if (className == null) {
             return classfileBuffer;
@@ -169,7 +169,7 @@ public class DeadlockTracerTransformer implements ClassFileTransformer {
             @Override
             protected String getCommonSuperClass(final String type1, final String type2) {
                 throw new UnsupportedOperationException(
-                        "getCommonSuperClass() shall never be called, because we calculate the frames and max values on our own");
+                    "getCommonSuperClass() shall never be called, because we calculate the frames and max values on our own");
             }
         };
     }
@@ -207,7 +207,7 @@ public class DeadlockTracerTransformer implements ClassFileTransformer {
         PrintWriter traceFile;
         Path classAsmFileTempPath = resolveTempFile(className, suffix);
         BufferedWriter traceFileWriter = Files.newBufferedWriter(classAsmFileTempPath, StandardOpenOption.CREATE, StandardOpenOption.WRITE,
-                StandardOpenOption.TRUNCATE_EXISTING);
+            StandardOpenOption.TRUNCATE_EXISTING);
         traceFile = new PrintWriter(traceFileWriter);
         return traceFile;
     }

@@ -1,10 +1,24 @@
 package de.turban.deadlock.tracer.runtime.serdata;
 
-import de.turban.deadlock.tracer.runtime.*;
+import de.turban.deadlock.tracer.runtime.ICacheEntry;
+import de.turban.deadlock.tracer.runtime.IDeadlockDataResolver;
+import de.turban.deadlock.tracer.runtime.IFieldCacheEntry;
+import de.turban.deadlock.tracer.runtime.IFieldDescriptor;
+import de.turban.deadlock.tracer.runtime.ILocationCache;
+import de.turban.deadlock.tracer.runtime.ILockCacheEntry;
+import de.turban.deadlock.tracer.runtime.IReportFieldCache;
+import de.turban.deadlock.tracer.runtime.IReportFieldDescriptorCache;
+import de.turban.deadlock.tracer.runtime.IReportLockCache;
+import de.turban.deadlock.tracer.runtime.IThreadCache;
+import de.turban.deadlock.tracer.runtime.JctraceUtil;
 import de.turban.deadlock.tracer.runtime.serdata.IHasRevision.RevisionComparator;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.BiFunction;
 
@@ -95,10 +109,10 @@ public class DataResolverCreator {
         }
 
         List<IFieldDescriptor> unmodifiableList = Collections.unmodifiableList(
-                map.valueCollection()
-                        .stream()
-                        .sorted()
-                        .collect(toList())
+            map.valueCollection()
+                .stream()
+                .sorted()
+                .collect(toList())
         );
 
         return new IReportFieldDescriptorCache() {
@@ -148,35 +162,35 @@ public class DataResolverCreator {
     private IReportLockCache buildLockCache(List<LockCacheEntrySer> locksSer) {
 
         return buildCache(locksSer, (list, map) ->
-                new IReportLockCache() {
+            new IReportLockCache() {
 
-                    @Override
-                    public List<ILockCacheEntry> getLockEntries() {
-                        return JctraceUtil.uncheckedCast(list);
-                    }
+                @Override
+                public List<ILockCacheEntry> getLockEntries() {
+                    return JctraceUtil.uncheckedCast(list);
+                }
 
-                    @Override
-                    public ILockCacheEntry getLockById(int id) {
-                        return map.get(id);
-                    }
-                });
+                @Override
+                public ILockCacheEntry getLockById(int id) {
+                    return map.get(id);
+                }
+            });
     }
 
     private IReportFieldCache buildFieldCache(List<FieldCacheEntrySer> fieldSer) {
 
         return buildCache(fieldSer, (list, map) ->
-                new IReportFieldCache() {
+            new IReportFieldCache() {
 
-                    @Override
-                    public List<IFieldCacheEntry> getFieldEntries() {
-                        return JctraceUtil.uncheckedCast(list);
-                    }
+                @Override
+                public List<IFieldCacheEntry> getFieldEntries() {
+                    return JctraceUtil.uncheckedCast(list);
+                }
 
-                    @Override
-                    public IFieldCacheEntry getFieldById(int id) {
-                        return map.get(id);
-                    }
-                });
+                @Override
+                public IFieldCacheEntry getFieldById(int id) {
+                    return map.get(id);
+                }
+            });
     }
 
     private <T extends ICacheEntry & IHasRevision & Comparable & IHasStacksamples, R> R buildCache(List<T> ser, BiFunction<List<T>, TIntObjectHashMap<T>, R> cacheCreator) {

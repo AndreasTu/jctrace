@@ -43,7 +43,7 @@ public class SyncMethodVisitor extends AdviceAdapter {
 
     public SyncMethodVisitor(int version, final MethodVisitor writer, String className, String classNameJavaStyle, String sourceFile, final int access, final String name,
                              final String desc) {
-        super(Opcodes.ASM5, writer, access, name, desc);
+        super(JctraceAsmUtil.ASM_VERSION, writer, access, name, desc);
         this.version = version;
         this.className = className;
         this.classNameJavaStyle = classNameJavaStyle;
