@@ -1,8 +1,8 @@
-# Java Concurrency Tracer (jctrace)
+# JConcurrency Tracer (jctrace)
 
-The Java Concurrency Tracer allows you to find deadlocks in your Java application.
+The JConcurrency Tracer allows you to find deadlocks in your Java application.
 
-The Java Concurrency Tracer instruments a Java application to find **potential** deadlocks in the system.
+The JConcurrency Tracer instruments a Java application to find **potential** deadlocks in the system.
 Jctrace will create a database of all taken and release locks in the application.
 In a second step jctrace will calculate if any two locks have any threads, where the lock order is inversed, which will flag an potential deadlock.
 
@@ -34,7 +34,7 @@ The built jar file it then located in `subprojects/jctrace-core/build/libs/jctra
 ## Create a measurement
 First you have to create a measurement of your running application.
 
-Start your application with the following additional java vm arguments:
+Start your application with the following additional Java-VM arguments:
 ```
 -javaagent:jctrace-core-1.0.0-SNAPSHOT-all.jar
 -Xbootclasspath/a:jctrace-core-1.0.0-SNAPSHOT-all.jar
