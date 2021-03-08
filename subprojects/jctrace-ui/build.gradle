@@ -1,4 +1,3 @@
-
 def mainClassName = 'de.turban.deadlock.tracer.runtime.display.ui.DeadlockTracerUiMain'
 
 // In this section you declare the dependencies for your production and test code
@@ -9,34 +8,34 @@ dependencies {
 }
 
 
-tasks.register("runUI", JavaExec){
+tasks.register("runUI", JavaExec) {
     group "Run"
     description "Starts the UI to display the database specified with -PdbFile=Deadlock.db"
     classpath = sourceSets.main.runtimeClasspath
 
     main = mainClassName
-    if(hasDbFile()){
+    if (hasDbFile()) {
         it.args rootProject.file(rootProject.ext.dbFile)
     }
 
-    it.doFirst{
+    it.doFirst {
         assertDbFileSpecified()
     }
 }
 
-tasks.register("runReportXml", JavaExec){
+tasks.register("runReportXml", JavaExec) {
     group "Run"
     classpath = sourceSets.main.runtimeClasspath
 
     main = 'de.turban.deadlock.tracer.runtime.display.PrintMain'
-    if(hasDbFile()){
+    if (hasDbFile()) {
         it.args rootProject.file(rootProject.ext.dbFile)
     }
-    if(hasReportFile()){
+    if (hasReportFile()) {
         it.args rootProject.file(rootProject.ext.reportFile)
     }
 
-    it.doFirst{
+    it.doFirst {
         assertDbFileSpecified()
         assertReportFileSpecified()
     }
@@ -52,9 +51,9 @@ jar {
     manifest {
 
         attributes(
-                'Implementation-Title': project.name,
-                'Implementation-Version': project.version,
-                'Main-Class': mainClassName,
+            'Implementation-Title': project.name,
+            'Implementation-Version': project.version,
+            'Main-Class': mainClassName,
         )
     }
 }
@@ -63,22 +62,23 @@ jar {
 /*
  * Helper methods
  */
-boolean hasDbFile(){
+
+boolean hasDbFile() {
     rootProject.hasProperty('dbFile')
 }
 
-boolean hasReportFile(){
+boolean hasReportFile() {
     rootProject.hasProperty('reportFile')
 }
 
-void assertDbFileSpecified(){
-    if(!hasDbFile()){
+void assertDbFileSpecified() {
+    if (!hasDbFile()) {
         throw new IllegalArgumentException("You have to specify a db file with -PdbFile=pathToFile")
     }
 }
 
-void assertReportFileSpecified(){
-    if(!hasReportFile()){
+void assertReportFileSpecified() {
+    if (!hasReportFile()) {
         throw new IllegalArgumentException("You have to specify a report file with -PreportFile=pathToFile")
     }
 }

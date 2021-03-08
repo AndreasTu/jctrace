@@ -1,11 +1,18 @@
 package de.turban.deadlock.tracer.runtime.display;
 
-import de.turban.deadlock.tracer.runtime.*;
+import de.turban.deadlock.tracer.runtime.ICacheEntry;
+import de.turban.deadlock.tracer.runtime.IDeadlockDataResolver;
+import de.turban.deadlock.tracer.runtime.IFieldCacheEntry;
+import de.turban.deadlock.tracer.runtime.IFieldDescriptor;
+import de.turban.deadlock.tracer.runtime.ILockCacheEntry;
+import de.turban.deadlock.tracer.runtime.IStackSample;
+import de.turban.deadlock.tracer.runtime.IThreadCache;
 import de.turban.deadlock.tracer.runtime.datacollection.LocationCache;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -38,7 +45,7 @@ public class DeadlockCacheXmlPrinter {
 
         System.out.println("Printing possible DeadLock into XML file: " + file.toFile().getAbsolutePath());
         try (BufferedWriter writer = Files.newBufferedWriter(file,
-                Charset.forName("UTF-8"), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
+            StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
             this.writer = writer;
             appendLine("<DeadLockReport>");
             printPossibleDeadLocks(possibleDeadLocksSorted, true);
@@ -53,7 +60,7 @@ public class DeadlockCacheXmlPrinter {
         Path allLocksFile = file.getParent().resolve(file.toFile().getName() + ".AllLocks.xml");
         System.out.println("Printing all found Locks into XML file: " + allLocksFile.toFile().getAbsolutePath());
         try (BufferedWriter writer = Files.newBufferedWriter(allLocksFile,
-                Charset.forName("UTF-8"), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
+            StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
             this.writer = writer;
             appendLine("<DeadLockReport>");
             printMeasuredLocks(locks);

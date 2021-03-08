@@ -65,7 +65,6 @@ public class DeadlockCalculator {
         return resolver.getFieldCache().getFieldEntries();
     }
 
-
     public List<IFieldDescriptor> getAllFieldDescriptorsSorted() {
         return resolver.getFieldDescriptorCache().getFieldDescriptors();
     }

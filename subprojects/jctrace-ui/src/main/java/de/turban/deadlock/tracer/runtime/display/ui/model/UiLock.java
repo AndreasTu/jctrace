@@ -67,17 +67,17 @@ public class UiLock {
 
     public ObservableList<String> getLocations() {
         List<String> list = Arrays
-                .stream(lockCache.getLocationIds())
-                .mapToObj(id -> resolver.getLocationCache().getLocationById(id).toString())
-                .collect(Collectors.toList());
+            .stream(lockCache.getLocationIds())
+            .mapToObj(id -> resolver.getLocationCache().getLocationById(id).toString())
+            .collect(Collectors.toList());
         return FXCollections.observableList(list);
     }
 
     public ObservableList<String> getThreads() {
         List<String> list = Arrays
-                .stream(lockCache.getThreadIds())
-                .mapToObj(id -> resolver.getThreadCache().getThreadDescriptionById(id))
-                .collect(Collectors.toList());
+            .stream(lockCache.getThreadIds())
+            .mapToObj(id -> resolver.getThreadCache().getThreadDescriptionById(id))
+            .collect(Collectors.toList());
 
         return FXCollections.observableList(list);
     }

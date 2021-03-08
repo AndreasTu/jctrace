@@ -1,6 +1,5 @@
 package de.turban.deadlock.tracer.runtime.display.ui;
 
-import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -72,7 +71,7 @@ public class DeadlockTracerUiMain extends Application {
 
     public static void main(String[] args) {
         System.out.println("Deadlock Tracer Ui started...");
-        if(args.length == 0) {
+        if (args.length == 0) {
             System.out.println("Please specify a Database file as first argument.");
             System.exit(1);
         }

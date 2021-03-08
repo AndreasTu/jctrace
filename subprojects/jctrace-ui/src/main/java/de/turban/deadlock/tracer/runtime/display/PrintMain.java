@@ -22,5 +22,4 @@ public class PrintMain {
         long stopTime = System.currentTimeMillis();
         System.out.println("Printing report took " + (stopTime - startTime) + "ms");
     }
-
 }
