@@ -4,14 +4,14 @@ plugins {
 
 dependencies {
     // The production code uses the SLF4J logging API at compile time
-    implementation deps.slf4j
-    implementation deps.slf4jJdk
+    implementation libs.slf4j
+    implementation libs.slf4jJdk
 
-    implementation deps.asm
-    implementation deps.gnuTrove
+    implementation libs.bundles.asmAll
+    implementation libs.gnuTrove
 
     //Currently not used in production
-    implementation deps.disruptor
+    implementation libs.disruptor
 }
 
 
@@ -24,7 +24,7 @@ test {
 
 shadowJar {
     dependencies {
-        exclude(dependency(deps.disruptor))
+        exclude(dependency(libs.disruptor.get()))
         exclude('module-info.class')
     }
     //ASM
@@ -62,14 +62,8 @@ jar {
     manifest {
 
         attributes(
-
-            'Implementation-Title': project.name,
-
-            'Implementation-Version': project.version,
             'Can-Redefine-Classes': 'true',
-            //'Main-Class': 'de.turban.deadlock.tracer.runtime.display.ui.DeadlockTracerUiMain',
             'Premain-Class': 'de.turban.deadlock.tracer.DeadlockTracerAgent'
-
         )
     }
 }

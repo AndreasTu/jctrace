@@ -7,9 +7,9 @@ def mainClassName = 'de.turban.deadlock.tracer.runtime.display.ui.DeadlockTracer
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-    implementation project(':subprojects:jctrace-core')
-    implementation deps.guava
-    implementation deps.gnuTrove
+    implementation project(':jctrace-core')
+    implementation libs.guava
+    implementation libs.gnuTrove
 }
 
 
@@ -48,11 +48,9 @@ tasks.register("runReportXml", JavaExec) {
     }
 }
 
-jar {
+tasks.named("jar", Jar).configure {
     manifest {
         attributes(
-            'Implementation-Title': project.name,
-            'Implementation-Version': project.version,
             'Main-Class': mainClassName,
         )
     }

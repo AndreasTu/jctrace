@@ -1,35 +1,66 @@
 plugins{
-    id "com.github.johnrengelman.shadow" version "6.1.0" apply false
-    id "org.openjfx.javafxplugin" version "0.0.9" apply false
+    id 'base'
+    id 'jacoco'
+    id 'com.github.spotbugs' version '5.0.14' apply false
+    id 'com.github.ben-manes.versions' version '0.47.0'
+    id "com.github.johnrengelman.shadow" version "8.1.1" apply false
+    id "org.openjfx.javafxplugin" version "0.0.14" apply false
 }
 
-allprojects{
-    repositories {
-        jcenter()
-        maven {
-            // Ow2 ASM repository
-            url 'https://repository.ow2.org/nexus/content/repositories/releases'
-        }
-    }
-}
-
-apply from: "gradle/depsExt.gradle"
-apply from: "versions.gradle"
+version = "1.0.0-SNAPSHOT"
 
 subprojects{
-    apply plugin: 'java'
+    project.apply plugin: "java"
+    project.apply plugin: "groovy"
+    project.apply plugin: "publishing"
+    //project.apply plugin: "com.github.spotbugs"
+
+    group = "com.github.AndreasTu.jctrace"
     version = rootProject.version
 
+    tasks.withType(JavaCompile).configureEach {
+        //options.release.set(17)
+        options.encoding = "UTF-8"
+    }
+
+    tasks.withType(Jar).configureEach {
+        it.setPreserveFileTimestamps(false)
+        it.setReproducibleFileOrder(true)
+    }
+
+    tasks.named("jar", Jar).configure {
+        manifest {
+            attributes(
+                "Implementation-Title": project.name,
+                "Implementation-Version": project.version,
+                "Implementation-Vendor": "Andreas Turban",
+            )
+        }
+    }
 
     //Common Dependencies Configuration
-    dependencies {
-        compileOnly deps.jsr305
+    project.dependencies {
+        compileOnly libs.googleFindbugsAnno
+        compileOnly libs.spotBugsAnno
 
-        testImplementation deps.junit5Api
-        testRuntimeOnly deps.junit5Impl
-        testImplementation deps.assertJ
-        testImplementation deps.guava
+        testImplementation libs.groovy
+        testImplementation(libs.spockCore) {
+            exclude module: "groovy"
+        }
+        testImplementation libs.junit5Api
+        testImplementation libs.assertJ
+        testImplementation libs.guava
+
+        testRuntimeOnly libs.junitPlatform
+        testRuntimeOnly libs.junit5Impl
     }
+
+    /*
+    tasks.named("spotbugsTest").configure {
+        //We do not execute spotbugs on test code
+        enabled = false
+    }
+    */
 
     //Common test configuration
     tasks.withType(Test).configureEach{
