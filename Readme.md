@@ -4,10 +4,11 @@ The JConcurrency Tracer allows you to find deadlocks in your Java application.
 
 The JConcurrency Tracer instruments a Java application to find **potential** deadlocks in the system.
 Jctrace will create a database of all taken and release locks in the application.
-In a second step jctrace will calculate if any two locks have any threads, where the lock order is inversed, which will flag an potential deadlock.
+In a second step jctrace will calculate if any two locks have any threads, where the lock order is inverse, which will flag a potential deadlock.
 
-
-**Note:** Not every flaged potential deadlock, will be a real deadlock in you system. E.g. if you can guarantee that the found lock orders can not happen at the same time, the potential deadlock can not happen. But it would be no good concurrency design to rely on these fragile terms.
+**Note:** Not every flagged potential deadlock, will be a real deadlock in your system. 
+E.g. if you can guarantee that the found lock orders can not happen at the same time, the potential deadlock can not happen. 
+But it would be no good concurrency design to rely on these fragile terms.
 
 ## Analysis details
 
@@ -21,7 +22,7 @@ Jctrace will instrument and measure the following items:
 
 The jctrace is currently only tested with Java 8 and Java 11.
 
-Jctrace could also create stacktraces of found potential deadlocks to ease the fix of the underlying problem.
+Jctrace could also create stack traces of found potential deadlocks to ease the fix of the underlying problem.
 
 ##  How to build jctrace?
 To build the project just run:
@@ -32,6 +33,7 @@ gradlew shadowJar
 The built jar file it then located in `subprojects/jctrace-core/build/libs/jctrace-core-1.0.0-SNAPSHOT-all.jar
 
 ## Create a measurement
+
 First you have to create a measurement of your running application.
 
 Start your application with the following additional Java-VM arguments:
@@ -47,12 +49,14 @@ You could blacklist whole packages including all sub packages with `-Dde.turban.
 Packages are separated with an `;`.
 
 #### Stacktrace
-You could enable the collection of stacktraces for certain classes with `-Dde.turban.DeadLockTracer.stacktracingClasses`
+
+You could enable the collection of stack traces for certain classes with `-Dde.turban.DeadLockTracer.stacktracingClasses`
 
 Class names are separated with an `;`.
  
 
 ##### Full sample
+
 Full Path sample:
 ```
 -javaagent:/Path/To/Jar/File/jctrace-core-1.0.0-SNAPSHOT-all.jar
@@ -76,6 +80,7 @@ gradlew run -PdbFile=Deadlock.db
 Note: In the current version the UI will the show anything, if there is no potential deadlock.
 
 ## Create a report 
+
 Or you could create an XML report from the Database, if you call:
 ```
 gradlew runReportXml -PdbFile=Deadlock.db -PreportFile=DeadlockReport.xml 
@@ -93,6 +98,7 @@ gradlew runReportXml -PdbFile=Deadlock.db -PreportFile=DeadlockReport.xml
 
 
 ## Contributors
+
 * Creator:
   * Andreas Turban (GitHub: AndreasTu)
 
