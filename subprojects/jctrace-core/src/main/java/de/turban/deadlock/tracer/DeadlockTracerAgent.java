@@ -5,7 +5,11 @@ import de.turban.deadlock.tracer.transformation.DeadlockTracerTransformer;
 
 import java.lang.instrument.Instrumentation;
 
-public class DeadlockTracerAgent {
+public final class DeadlockTracerAgent {
+
+    private DeadlockTracerAgent() {
+
+    }
 
     public static void premain(String agentArgument, Instrumentation instrumentation) {
         DeadlockTracerTransformer transformer = new DeadlockTracerTransformer();

@@ -12,9 +12,7 @@ import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
 
 public class ClassRedefiner {
-    private static Logger logger = LoggerFactory.getLogger(ClassRedefiner.class);
-
-    private static final String BOOT_PATH_PROPERTY = "sun.boot.class.path";
+    private static final Logger logger = LoggerFactory.getLogger(ClassRedefiner.class);
     private static final String REENTRANT_LOCK_CLASS = "java/util/concurrent/locks/ReentrantLock";
     private static final String REENTRANT_LOCK_JAVA = "java.util.concurrent.locks.ReentrantLock";
 
@@ -42,7 +40,8 @@ public class ClassRedefiner {
                         instrumentation.redefineClasses(def);
 
                     }
-                } catch (ClassNotFoundException | UnmodifiableClassException | IllegalClassFormatException | IOException e) {
+                } catch (ClassNotFoundException | UnmodifiableClassException | IllegalClassFormatException |
+                         IOException e) {
                     logger.error("Could not redefine Class ReentrantLock.", e);
                 }
             }

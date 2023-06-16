@@ -18,7 +18,7 @@ public class DeadlockTracerClassBinding {
     public static final String TRACER_PKG = "de.turban.deadlock.tracer";
     public static final String TRACER_STATIC_CLASS = "de/turban/deadlock/tracer/DeadlockTracerClassBinding";
 
-    private static boolean LOGGER_TRACE_STATIC_ENABLED = false;
+    private static final boolean LOGGER_TRACE_STATIC_ENABLED = false;
 
     private static Logger logger;
 
@@ -29,7 +29,7 @@ public class DeadlockTracerClassBinding {
         return logger;
     }
 
-    private static ThreadLocal<PerThreadData> running = ThreadLocal.withInitial(() -> new PerThreadData(getBindingResolver()));
+    private static final ThreadLocal<PerThreadData> running = ThreadLocal.withInitial(() -> new PerThreadData(getBindingResolver()));
 
     static IDeadlockCollectBindingResolver getBindingResolver() {
         return DeadlockCollectBindingResolver.INSTANCE;

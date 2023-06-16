@@ -20,11 +20,7 @@ class DeadlockTraceClassVisitor extends ClassVisitor {
 
     @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-        if (version < Opcodes.V1_5) {
-            this.version = Opcodes.V1_5;
-        } else {
-            this.version = version;
-        }
+        this.version = Math.max(version, Opcodes.V1_5);
 
         this.className = name;
         this.classNameJavaStyle = classNameJavaStyle(className);

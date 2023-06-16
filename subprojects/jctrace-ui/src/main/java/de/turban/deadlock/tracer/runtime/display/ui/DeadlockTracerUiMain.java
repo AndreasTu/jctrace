@@ -70,13 +70,19 @@ public class DeadlockTracerUiMain extends Application {
     }
 
     public static void main(String[] args) {
-        System.out.println("Deadlock Tracer Ui started...");
-        if (args.length == 0) {
-            System.out.println("Please specify a Database file as first argument.");
+        try {
+            System.out.println("Deadlock Tracer Ui started...");
+            if (args.length == 0) {
+                System.out.println("Please specify a Database file as first argument.");
+                System.exit(1);
+            }
+
+            databaseFileStatic = new File(args[0]).toPath();
+            launch(args);
+        }catch (Throwable ex){
+            System.err.println("Unhandled exception occurred, shutting down.");
+            ex.printStackTrace(System.err);
             System.exit(1);
         }
-
-        databaseFileStatic = new File(args[0]).toPath();
-        launch(args);
     }
 }

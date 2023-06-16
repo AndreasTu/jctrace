@@ -23,8 +23,7 @@ import java.security.ProtectionDomain;
 import static de.turban.deadlock.tracer.transformation.TransformationConstants.CLASS_FILE_SUFFIX;
 
 public class DeadlockTracerTransformer implements ClassFileTransformer {
-
-    private static Logger logger = LoggerFactory.getLogger(DeadlockTracerTransformer.class);
+    private static final Logger logger = LoggerFactory.getLogger(DeadlockTracerTransformer.class);
 
     private static boolean TRACE_CLASS_TRANSFORMATION = false;
 
@@ -34,13 +33,11 @@ public class DeadlockTracerTransformer implements ClassFileTransformer {
 
     private final Path tmpFolder;
 
-
     static {
         if (!TRACE_CLASS_TRANSFORMATION) {
             TRACE_CLASS_TRANSFORMATION = logger.isTraceEnabled();
         }
     }
-
 
     public DeadlockTracerTransformer() {
         Path tmpFolderLoc = null;

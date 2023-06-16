@@ -1,11 +1,10 @@
-
-tasks.register("runMeasurementTest", JavaExec){
+tasks.register("runMeasurementTest", JavaExec) {
     it.dependsOn("shadowJar")
     group "Run"
 
     classpath = sourceSets.test.runtimeClasspath
 
-    main = 'de.turban.deadlock.tests.tracer.TestMain'
+    it.mainClass.set('de.turban.deadlock.tests.tracer.TestMain')
 
     it.jvmArgs([
         '-javaagent:build/libs/jctrace-core-1.0.0-SNAPSHOT-all.jar',
